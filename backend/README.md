@@ -20,13 +20,36 @@ docker-compose up -d
 ### Option 3: Manual Setup
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Create virtual environment (Python 3.12 recommended)
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate  # Windows
+
+# Upgrade pip
+pip install --upgrade pip
+
+# Install all required packages
+pip install fastapi uvicorn websockets redis pydantic python-multipart
+pip install aiofiles python-jose[cryptography] passlib[bcrypt] python-ulid
+pip install requests aiohttp portia-sdk celery sqlalchemy alembic
+pip install pytest pytest-asyncio httpx
+
+# Alternatively, if requirements.txt exists
 pip install -r requirements.txt
+
+# Set up environment
 cp .env.example .env
 # Edit .env with your configuration
+
+# Start the server
 python main.py
 ```
+
+**Note**: The virtual environment (`venv/`) is excluded from Git to keep the repository clean. Follow these setup instructions to recreate the development environment on any machine.
 
 ## 📁 Project Structure
 
