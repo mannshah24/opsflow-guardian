@@ -74,3 +74,10 @@ backend/temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Development and testing scripts (not for production)
+compliance_check.py
+temp_*
+test_*
+debug_*
+scratch_*
