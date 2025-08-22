@@ -23,9 +23,9 @@ app = FastAPI(
     title="OpsFlow Guardian 2.0",
     description="AI-Powered Enterprise Workflow Automation with Human Oversight & Complete Audit Trails",
     version="2.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json"
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
 # Add CORS middleware for frontend integration
@@ -33,8 +33,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:8081", 
+        "http://localhost:8080",
         "http://localhost:3000", 
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:8080",
         "http://127.0.0.1:3000"
     ],
     allow_credentials=True,
