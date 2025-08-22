@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Workflow, 
   Plus, 
@@ -15,14 +16,19 @@ import {
   Trash2,
   Filter,
   Search,
-  BarChart3
+  BarChart3,
+  MoreVertical,
+  Bot,
+  Users,
+  Calendar,
+  Activity
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const workflowTemplates = [
   {
@@ -131,308 +137,382 @@ const getPriorityColor = (priority: string) => {
 };
 
 const Workflows = () => {
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
 
-  const filteredTemplates = workflowTemplates.filter(template =>
-    (selectedCategory === 'all' || template.category === selectedCategory) &&
-    template.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredWorkflows = activeWorkflows.filter(workflow =>
+    workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (selectedStatus === 'all' || workflow.status === selectedStatus)
   );
 
-  const categories = ['all', ...Array.from(new Set(workflowTemplates.map(t => t.category)))];
+  const handleStartWorkflow = (id: string) => {
+    console.log('Starting workflow:', id);
+    // Add actual workflow start logic here
+    alert(`Starting workflow ${id}`);
+  };
+
+  const handlePauseWorkflow = (id: string) => {
+    console.log('Pausing workflow:', id);
+    alert(`Pausing workflow ${id}`);
+  };
+
+  const handleStopWorkflow = (id: string) => {
+    console.log('Stopping workflow:', id);
+    alert(`Stopping workflow ${id}`);
+  };
+
+  const handleEditWorkflow = (id: string) => {
+    console.log('Editing workflow:', id);
+    alert(`Editing workflow ${id}`);
+  };
+
+  const handleCopyWorkflow = (id: string) => {
+    console.log('Copying workflow:', id);
+    alert(`Copying workflow ${id}`);
+  };
+
+  const handleDeleteWorkflow = (id: string) => {
+    console.log('Deleting workflow:', id);
+    if (confirm('Are you sure you want to delete this workflow?')) {
+      alert(`Deleted workflow ${id}`);
+    }
+  };
+
+  const handleViewDetails = (id: string) => {
+    console.log('Viewing workflow details:', id);
+    setSelectedWorkflow(selectedWorkflow === id ? null : id);
+  };
+
+  const handleCreateWorkflow = () => {
+    console.log('Creating new workflow');
+    alert('Opening workflow creation wizard...');
+  };
+
+  const statusFilters = ['all', 'running', 'paused', 'completed', 'failed'];
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold gradient-text">Workflow Management</h1>
-            <p className="text-foreground-muted mt-1">
-              Create, monitor, and manage automated workflows with Portia agents
+            <h1 className="text-2xl sm:text-3xl font-bold gradient-text">Workflow Management</h1>
+            <p className="text-foreground-muted mt-1 text-sm sm:text-base">
+              Monitor and manage your automated workflows with real-time insights
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="glass-button gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Analytics
-            </Button>
-            <Button className="bg-primary hover:bg-primary-dark gap-2">
-              <Plus className="w-4 h-4" />
-              New Workflow
-            </Button>
-          </div>
+          <Button 
+            onClick={handleCreateWorkflow}
+            className="bg-primary hover:bg-primary-dark text-white gap-2 w-full sm:w-auto"
+            size={isMobile ? "default" : "default"}
+          >
+            <Plus className="w-4 h-4" />
+            {isMobile ? "New Workflow" : "Create Workflow"}
+          </Button>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <Workflow className="w-5 h-5 text-primary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-primary/20 rounded-lg">
+                  <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Active Workflows</p>
-                  <p className="text-2xl font-bold text-card-foreground">12</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Running</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">
+                    {activeWorkflows.filter(w => w.status === 'running').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/20 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-success" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-success/20 rounded-lg">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Completed Today</p>
-                  <p className="text-2xl font-bold text-card-foreground">47</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/20 rounded-lg">
-                  <Clock className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Avg Duration</p>
-                  <p className="text-2xl font-bold text-card-foreground">3.2m</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Completed</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">
+                    {activeWorkflows.filter(w => w.status === 'completed').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-secondary/20 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-secondary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-warning/20 rounded-lg">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Success Rate</p>
-                  <p className="text-2xl font-bold text-card-foreground">98.7%</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Pending</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">
+                    {activeWorkflows.filter(w => w.status === 'waiting_approval').length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-0">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-info/20 rounded-lg">
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Success Rate</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">94%</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="active">Active Workflows</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="builder">Workflow Builder</TabsTrigger>
-          </TabsList>
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+            <Input
+              placeholder="Search workflows..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+            {statusFilters.map((status) => (
+              <Button
+                key={status}
+                variant={selectedStatus === status ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus(status)}
+                className={`${selectedStatus === status ? "" : "glass-button"} whitespace-nowrap`}
+              >
+                {status === 'all' ? 'All' : status.replace('_', ' ')}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-          <TabsContent value="active" className="space-y-6 mt-6">
-            {/* Active Workflows */}
-            <div className="space-y-4">
-              {activeWorkflows.map((workflow) => (
-                <Card key={workflow.id} className="glass-card border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-card-foreground">
-                            {workflow.name}
-                          </h3>
-                          <Badge className={getStatusColor(workflow.status)}>
-                            {workflow.status.replace('_', ' ')}
-                          </Badge>
-                          <Badge className={getPriorityColor(workflow.priority)}>
-                            {workflow.priority}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-foreground-muted mb-2">
-                          Template: {workflow.template}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-foreground-muted">
-                          <span>Started: {workflow.startTime}</span>
-                          <span>Agent: {workflow.assignedAgent}</span>
-                          {workflow.status === 'running' && (
-                            <span>Est. completion: {workflow.estimatedCompletion}</span>
-                          )}
-                        </div>
+        {/* Workflows Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {filteredWorkflows.map((workflow) => (
+            <Card key={workflow.id} className="glass-card border-0 hover:shadow-lg transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="p-2 bg-primary/20 rounded-lg flex-shrink-0">
+                        <Workflow className="w-4 h-4 text-primary" />
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="glass-button">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {workflow.status === 'running' ? (
-                          <Button variant="outline" size="sm" className="glass-button">
-                            <Pause className="w-4 h-4" />
-                          </Button>
-                        ) : workflow.status === 'waiting_approval' ? (
-                          <Button size="sm" className="bg-primary hover:bg-primary-dark">
-                            <Play className="w-4 h-4" />
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" className="glass-button">
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                        )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-card-foreground text-sm sm:text-base truncate">
+                          {workflow.name}
+                        </h3>
+                        <p className="text-xs text-foreground-muted">{workflow.template}</p>
                       </div>
                     </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewDetails(workflow.id)}
+                      className="glass-button p-2"
+                    >
+                      <Eye className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="glass-button p-2"
+                    >
+                      <MoreVertical className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
 
-                    {/* Progress */}
-                    {workflow.status === 'running' && (
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-foreground-muted">{workflow.currentStep}</span>
-                          <span className="text-card-foreground">{workflow.progress}%</span>
-                        </div>
-                        <Progress value={workflow.progress} className="h-2" />
+                {/* Status and Progress */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <Badge className={getStatusColor(workflow.status)}>
+                      {workflow.status.replace('_', ' ')}
+                    </Badge>
+                    <Badge className={getPriorityColor(workflow.priority)}>
+                      {workflow.priority}
+                    </Badge>
+                  </div>
+
+                  {workflow.status === 'running' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-foreground-muted">Progress</span>
+                        <span className="text-card-foreground font-medium">{workflow.progress}%</span>
+                      </div>
+                      <Progress value={workflow.progress} className="h-2" />
+                    </div>
+                  )}
+
+                  <div className="text-xs text-foreground-muted">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Clock className="w-3 h-3" />
+                      Started: {workflow.startTime}
+                    </div>
+                    {workflow.estimatedCompletion && (
+                      <div className="flex items-center gap-1 mb-1">
+                        <Calendar className="w-3 h-3" />
+                        ETA: {workflow.estimatedCompletion}
                       </div>
                     )}
-
-                    {/* Tools */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-wrap gap-2">
-                        {workflow.tools.map((tool) => (
-                          <Badge key={tool} variant="outline" className="text-xs">
-                            {tool}
-                          </Badge>
-                        ))}
-                      </div>
-                      {workflow.status === 'completed' && workflow.completedTime && (
-                        <span className="text-xs text-success">
-                          Completed: {workflow.completedTime}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-1">
+                      <Bot className="w-3 h-3" />
+                      {workflow.assignedAgent}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
+                  </div>
+                </div>
 
-          <TabsContent value="templates" className="space-y-6 mt-6">
-            {/* Search and Filter */}
-            <div className="flex gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-                <Input
-                  placeholder="Search workflow templates..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex gap-2">
-                {categories.map((category) => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category)}
-                    className={selectedCategory === category ? "" : "glass-button"}
-                  >
-                    {category === 'all' ? 'All' : category}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                {/* Current Step */}
+                <div className="glass-card p-3 rounded-lg mb-4 bg-background-subtle/50">
+                  <p className="text-xs font-medium text-card-foreground mb-1">Current Step</p>
+                  <p className="text-xs text-foreground-muted">{workflow.currentStep}</p>
+                </div>
 
-            {/* Template Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTemplates.map((template) => (
-                <Card key={template.id} className="glass-card border-0 hover:border-primary/50 transition-all duration-200">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-base">{template.name}</CardTitle>
-                        <Badge variant="outline" className="mt-2 text-xs">
-                          {template.category}
-                        </Badge>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-foreground-muted">Popularity</div>
-                        <div className="text-sm font-medium text-card-foreground">
-                          {template.popularity}%
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-foreground-muted mb-4">
-                      {template.description}
-                    </p>
-                    
-                    <div className="space-y-3 mb-4">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground-muted">Estimated Time:</span>
-                        <span className="text-card-foreground">{template.estimatedTime}</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-foreground-muted">Steps:</span>
-                        <span className="text-card-foreground">{template.steps}</span>
-                      </div>
-                    </div>
+                {/* Tools */}
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {workflow.tools.map((tool) => (
+                    <Badge key={tool} variant="outline" className="text-xs">
+                      {tool}
+                    </Badge>
+                  ))}
+                </div>
 
-                    <div className="mb-4">
-                      <div className="text-xs text-foreground-muted mb-2">Tools:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {template.tools.slice(0, 3).map((tool) => (
-                          <Badge key={tool} variant="outline" className="text-xs">
-                            {tool}
-                          </Badge>
-                        ))}
-                        {template.tools.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{template.tools.length - 3}
-                          </Badge>
+                {/* Actions */}
+                <div className="flex gap-2">
+                  {workflow.status === 'running' ? (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handlePauseWorkflow(workflow.id)}
+                        className="glass-button text-warning border-warning/50 hover:bg-warning/10 flex-1"
+                      >
+                        <Pause className="w-3 h-3 mr-1" />
+                        Pause
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleStopWorkflow(workflow.id)}
+                        className="glass-button text-error border-error/50 hover:bg-error/10 flex-1"
+                      >
+                        <Square className="w-3 h-3 mr-1" />
+                        Stop
+                      </Button>
+                    </>
+                  ) : workflow.status === 'paused' ? (
+                    <>
+                      <Button 
+                        size="sm"
+                        onClick={() => handleStartWorkflow(workflow.id)}
+                        className="bg-primary hover:bg-primary-dark text-white flex-1"
+                      >
+                        <Play className="w-3 h-3 mr-1" />
+                        Resume
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleStopWorkflow(workflow.id)}
+                        className="glass-button text-error border-error/50 hover:bg-error/10"
+                      >
+                        <Square className="w-3 h-3" />
+                      </Button>
+                    </>
+                  ) : workflow.status === 'completed' ? (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleCopyWorkflow(workflow.id)}
+                        className="glass-button flex-1"
+                      >
+                        <Copy className="w-3 h-3 mr-1" />
+                        Clone
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditWorkflow(workflow.id)}
+                        className="glass-button"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      size="sm"
+                      onClick={() => handleStartWorkflow(workflow.id)}
+                      className="bg-success hover:bg-success/90 text-white w-full"
+                    >
+                      <Play className="w-3 h-3 mr-1" />
+                      Start Workflow
+                    </Button>
+                  )}
+                </div>
+
+                {/* Expanded Details */}
+                {selectedWorkflow === workflow.id && (
+                  <div className="mt-4 pt-4 border-t border-border/50 space-y-3">
+                    <div className="glass-card p-3 rounded-lg bg-background-subtle/30">
+                      <h4 className="text-xs font-medium text-card-foreground mb-2">Workflow Details</h4>
+                      <div className="space-y-1 text-xs text-foreground-muted">
+                        <div>ID: {workflow.id}</div>
+                        <div>Template: {workflow.template}</div>
+                        <div>Agent: {workflow.assignedAgent}</div>
+                        {workflow.completedTime && (
+                          <div>Completed: {workflow.completedTime}</div>
                         )}
                       </div>
                     </div>
-
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1 bg-primary hover:bg-primary-dark">
-                        Use Template
-                      </Button>
-                      <Button variant="outline" size="sm" className="glass-button">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="builder" className="space-y-6 mt-6">
-            <Card className="glass-card border-0">
-              <CardHeader>
-                <CardTitle>Workflow Builder</CardTitle>
-                <p className="text-sm text-foreground-muted">
-                  Create custom workflows with drag-and-drop interface
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Workflow className="w-16 h-16 text-foreground-muted mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium text-card-foreground mb-2">
-                    Visual Workflow Builder Coming Soon
-                  </h3>
-                  <p className="text-sm text-foreground-muted mb-6 max-w-md mx-auto">
-                    Design complex workflows with our intuitive drag-and-drop interface. 
-                    Connect tools, set conditions, and create powerful automations.
-                  </p>
-                  <Button className="bg-primary hover:bg-primary-dark">
-                    Request Early Access
-                  </Button>
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filteredWorkflows.length === 0 && (
+          <Card className="glass-card border-0">
+            <CardContent className="p-12 text-center">
+              <Workflow className="w-16 h-16 text-foreground-muted mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-card-foreground mb-2">
+                No workflows found
+              </h3>
+              <p className="text-sm text-foreground-muted mb-6">
+                {searchQuery ? 'Try adjusting your search or filters.' : 'Create your first workflow to get started.'}
+              </p>
+              <Button 
+                onClick={handleCreateWorkflow}
+                className="bg-primary hover:bg-primary-dark text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Workflow
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

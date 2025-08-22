@@ -2,6 +2,7 @@ import React from 'react';
 import { Bot, Brain, Zap, Shield, Activity, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const agents = [
   {
@@ -36,25 +37,30 @@ const agents = [
 export const AgentMonitor = () => {
   return (
     <Card className="glass-card border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="w-6 h-6 text-primary" />
-          Multi-Agent System Monitor
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+          <span className="truncate">Multi-Agent System Monitor</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {agents.map((agent) => (
             <div key={agent.name} className="glass-card p-4 rounded-lg border border-border-hover">
               <div className="flex items-center gap-3 mb-4">
-                <div className={cn('p-2 rounded-lg bg-background-subtle', agent.color)}>
-                  <agent.icon className="w-6 h-6" />
+                <div className={cn('p-2 rounded-lg bg-background-subtle flex-shrink-0', agent.color)}>
+                  <agent.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-card-foreground">{agent.name}</h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-card-foreground truncate text-sm sm:text-base">
+                    {agent.name}
+                  </h3>
                   <Badge 
                     variant={agent.status === 'active' ? 'default' : 'secondary'}
-                    className={agent.status === 'active' ? 'bg-success/20 text-success' : ''}
+                    className={cn(
+                      "text-xs mt-1",
+                      agent.status === 'active' ? 'bg-success/20 text-success' : ''
+                    )}
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-current mr-1.5 animate-pulse"></div>
                     {agent.status}
@@ -62,16 +68,16 @@ export const AgentMonitor = () => {
                 </div>
               </div>
 
-              <p className="text-sm text-foreground-muted mb-3">
+              <p className="text-xs sm:text-sm text-foreground-muted mb-3 line-clamp-2">
                 {agent.description}
               </p>
 
               <div className="glass-card p-3 rounded bg-background-subtle/50 mb-3">
                 <div className="flex items-center gap-2 mb-1">
-                  <Activity className="w-3 h-3 text-primary" />
+                  <Activity className="w-3 h-3 text-primary flex-shrink-0" />
                   <span className="text-xs font-medium">Current Task</span>
                 </div>
-                <p className="text-xs text-foreground-muted">
+                <p className="text-xs text-foreground-muted line-clamp-2">
                   {agent.currentTask}
                 </p>
               </div>
@@ -79,10 +85,10 @@ export const AgentMonitor = () => {
               <div className="space-y-2">
                 {Object.entries(agent.metrics).map(([key, value]) => (
                   <div key={key} className="flex justify-between text-xs">
-                    <span className="text-foreground-muted capitalize">
+                    <span className="text-foreground-muted capitalize truncate">
                       {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
                     </span>
-                    <span className="font-medium text-card-foreground">
+                    <span className="font-medium text-card-foreground flex-shrink-0">
                       {typeof value === 'number' && key.includes('Rate') ? `${value}%` : value}
                     </span>
                   </div>
@@ -95,8 +101,3 @@ export const AgentMonitor = () => {
     </Card>
   );
 };
-
-// Utility function for conditional classes
-function cn(...classes: (string | undefined | false | null)[]): string {
-  return classes.filter(Boolean).join(' ');
-}

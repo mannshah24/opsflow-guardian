@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const pendingApprovals = [
   {
@@ -70,36 +71,36 @@ export const ApprovalCenter = () => {
 
   return (
     <Card className="glass-card border-0 h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="w-6 h-6 text-warning" />
-          Pending Approvals
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-warning flex-shrink-0" />
+          <span className="truncate">Pending Approvals</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {pendingApprovals.map((approval) => (
           <div key={approval.id} className="glass-card p-4 rounded-lg border border-border-hover">
             {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h3 className="font-semibold text-card-foreground mb-1">
+            <div className="flex items-start justify-between mb-3 gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-card-foreground mb-1 text-sm sm:text-base truncate">
                   {approval.title}
                 </h3>
-                <p className="text-sm text-foreground-muted mb-2">
+                <p className="text-xs sm:text-sm text-foreground-muted mb-2 line-clamp-2">
                   {approval.description}
                 </p>
-                <div className="flex items-center gap-4 text-xs text-foreground-muted">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-foreground-muted">
                   <div className="flex items-center gap-1">
-                    <User className="w-3 h-3" />
-                    {approval.requestedBy}
+                    <User className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{approval.requestedBy}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {approval.timestamp}
+                    <Clock className="w-3 h-3 flex-shrink-0" />
+                    <span>{approval.timestamp}</span>
                   </div>
                 </div>
               </div>
-              <Badge className={`${getRiskColor(approval.riskLevel)} border-0`}>
+              <Badge className={cn(getRiskColor(approval.riskLevel), "border-0 text-xs shrink-0")}>
                 {approval.riskLevel === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
                 {approval.riskLevel} risk
               </Badge>
@@ -111,8 +112,8 @@ export const ApprovalCenter = () => {
               <div className="space-y-1">
                 {approval.steps.slice(0, 2).map((step, index) => (
                   <div key={index} className="text-xs text-foreground-muted flex items-start gap-2">
-                    <span className="text-primary font-medium">{index + 1}.</span>
-                    {step}
+                    <span className="text-primary font-medium flex-shrink-0">{index + 1}.</span>
+                    <span className="line-clamp-2">{step}</span>
                   </div>
                 ))}
                 {approval.steps.length > 2 && (
@@ -124,7 +125,7 @@ export const ApprovalCenter = () => {
             </div>
 
             {/* Tools and Metadata */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
               <div className="flex flex-wrap gap-1">
                 {approval.tools.slice(0, 3).map((tool) => (
                   <Badge key={tool} variant="outline" className="text-xs">
@@ -143,33 +144,38 @@ export const ApprovalCenter = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex-1 glass-button gap-2"
+                className="sm:flex-1 glass-button gap-2"
               >
                 <Eye className="w-4 h-4" />
-                Review Details
+                <span className="hidden sm:inline">Review Details</span>
+                <span className="sm:hidden">Review</span>
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => handleReject(approval.id)}
-                className="glass-button text-error border-error/50 hover:bg-error/10"
-              >
-                <XCircle className="w-4 h-4" />
-              </Button>
-              <Button 
-                size="sm"
-                onClick={() => handleApprove(approval.id)}
-                className={`bg-success hover:bg-success/90 text-white ${
-                  approval.riskLevel === 'high' ? 'animate-glow' : ''
-                }`}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Approve
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleReject(approval.id)}
+                  className="glass-button text-error border-error/50 hover:bg-error/10 flex-1 sm:flex-none"
+                >
+                  <XCircle className="w-4 h-4 sm:mr-0" />
+                  <span className="sm:hidden ml-2">Reject</span>
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => handleApprove(approval.id)}
+                  className={cn(
+                    "bg-success hover:bg-success/90 text-white flex-1 sm:flex-none",
+                    approval.riskLevel === 'high' ? 'animate-glow' : ''
+                  )}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Approve
+                </Button>
+              </div>
             </div>
           </div>
         ))}

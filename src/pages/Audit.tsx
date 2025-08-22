@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Shield, 
   Search, 
@@ -208,6 +209,7 @@ const getCategoryIcon = (category: string) => {
 };
 
 const Audit = () => {
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
@@ -224,80 +226,88 @@ const Audit = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold gradient-text">Audit Trail</h1>
-            <p className="text-foreground-muted mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold gradient-text">Audit Trail</h1>
+            <p className="text-foreground-muted mt-1 text-sm sm:text-base">
               Comprehensive audit logging and compliance monitoring for all workflow activities
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="glass-button gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              className="glass-button gap-2"
+              onClick={() => alert('Advanced filtering options would be implemented here')}
+            >
               <Filter className="w-4 h-4" />
-              Advanced Filter
+              {isMobile ? "Filter" : "Advanced Filter"}
             </Button>
-            <Button variant="outline" className="glass-button gap-2">
+            <Button 
+              variant="outline" 
+              className="glass-button gap-2"
+              onClick={() => alert('Exporting audit log... This would trigger a download')}
+            >
               <Download className="w-4 h-4" />
-              Export Audit Log
+              {isMobile ? "Export" : "Export Audit Log"}
             </Button>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <Activity className="w-5 h-5 text-primary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-primary/20 rounded-lg">
+                  <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Events Today</p>
-                  <p className="text-2xl font-bold text-card-foreground">1,847</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Events Today</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">1,847</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/20 rounded-lg">
-                  <Shield className="w-5 h-5 text-success" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-success/20 rounded-lg">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Compliance Score</p>
-                  <p className="text-2xl font-bold text-card-foreground">98.5%</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/20 rounded-lg">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Security Alerts</p>
-                  <p className="text-2xl font-bold text-card-foreground">3</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Compliance Score</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">98.5%</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-info/20 rounded-lg">
-                  <Database className="w-5 h-5 text-info" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-warning/20 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Data Retention</p>
-                  <p className="text-2xl font-bold text-card-foreground">7 Years</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Security Alerts</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">3</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-0">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-info/20 rounded-lg">
+                  <Database className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Data Retention</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">7 Years</p>
                 </div>
               </div>
             </CardContent>
@@ -314,7 +324,7 @@ const Audit = () => {
 
           <TabsContent value="events" className="space-y-6 mt-6">
             {/* Search and Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
                 <Input
@@ -324,14 +334,14 @@ const Audit = () => {
                   className="pl-10"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
                 {categories.slice(0, 4).map((category) => (
                   <Button
                     key={category}
                     variant={selectedCategory === category ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(category)}
-                    className={selectedCategory === category ? "" : "glass-button"}
+                    className={`${selectedCategory === category ? "" : "glass-button"} whitespace-nowrap`}
                   >
                     {category === 'all' ? 'All' : category.replace('_', ' ')}
                   </Button>
@@ -343,32 +353,34 @@ const Audit = () => {
             <div className="space-y-4">
               {filteredEvents.map((event) => (
                 <Card key={event.id} className="glass-card border-0">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     {/* Event Header */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {getSeverityIcon(event.severity)}
                           <div className="p-1 bg-background-subtle rounded">
                             {getCategoryIcon(event.category)}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-card-foreground">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                            <h3 className="font-semibold text-card-foreground text-sm sm:text-base">
                               {event.event}
                             </h3>
-                            <Badge className={getSeverityColor(event.severity)}>
-                              {event.severity}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {event.category.replace('_', ' ')}
-                            </Badge>
+                            <div className="flex gap-2 flex-wrap">
+                              <Badge className={getSeverityColor(event.severity)}>
+                                {event.severity}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {event.category.replace('_', ' ')}
+                              </Badge>
+                            </div>
                           </div>
                           <p className="text-sm text-foreground-muted mb-3">
                             {event.details}
                           </p>
-                          <div className="flex items-center gap-6 text-xs text-foreground-muted">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs text-foreground-muted">
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {event.timestamp}
@@ -379,40 +391,49 @@ const Audit = () => {
                               ) : (
                                 <User className="w-3 h-3" />
                               )}
-                              {event.actor}
+                              <span className="truncate">{event.actor}</span>
                             </div>
                             {event.workflow && (
-                              <div>Workflow: {event.workflow}</div>
+                              <div className="truncate">Workflow: {event.workflow}</div>
                             )}
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="glass-button">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="glass-button flex-shrink-0"
+                        onClick={() => {
+                          alert(`Event Details:\n\nID: ${event.id}\nCategory: ${event.category}\nSeverity: ${event.severity}\nTimestamp: ${event.timestamp}\n\nMetadata:\n${JSON.stringify(event.metadata, null, 2)}`);
+                        }}
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>
 
                     {/* Tools Used */}
                     {event.tools.length > 0 && (
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-xs text-foreground-muted">Tools:</span>
-                        {event.tools.map((tool) => (
-                          <Badge key={tool} variant="outline" className="text-xs">
-                            {tool}
-                          </Badge>
-                        ))}
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <span className="text-xs text-foreground-muted flex-shrink-0">Tools:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {event.tools.map((tool) => (
+                            <Badge key={tool} variant="outline" className="text-xs">
+                              {tool}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* Metadata */}
-                    <div className="glass-card p-4 rounded-lg bg-background-subtle/50">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div className="glass-card p-3 sm:p-4 rounded-lg bg-background-subtle/50">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-xs">
                         {Object.entries(event.metadata).map(([key, value]) => (
-                          <div key={key} className="flex justify-between">
-                            <span className="text-foreground-muted capitalize">
+                          <div key={key} className="flex flex-col sm:flex-row sm:justify-between gap-1">
+                            <span className="text-foreground-muted capitalize font-medium">
                               {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
                             </span>
-                            <span className="text-card-foreground font-medium text-right">
+                            <span className="text-card-foreground font-medium sm:text-right break-all">
                               {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : 
                                typeof value === 'number' ? value.toLocaleString() : 
                                value}
@@ -441,20 +462,20 @@ const Audit = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <TabsContent value="reports" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {complianceReports.map((report) => (
                 <Card key={report.id} className="glass-card border-0">
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-primary" />
-                      {report.name}
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                      <span className="truncate">{report.name}</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline">{report.type}</Badge>
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant="outline" className="text-xs">{report.type}</Badge>
                         <Badge className={
                           report.status === 'completed' ? 'bg-success/20 text-success' :
                           'bg-warning/20 text-warning'
@@ -463,25 +484,25 @@ const Audit = () => {
                         </Badge>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
                         <div>
-                          <div className="text-foreground-muted">Events</div>
+                          <div className="text-foreground-muted text-xs">Events</div>
                           <div className="font-medium text-card-foreground">{report.events}</div>
                         </div>
                         <div>
-                          <div className="text-foreground-muted">Violations</div>
+                          <div className="text-foreground-muted text-xs">Violations</div>
                           <div className="font-medium text-card-foreground">{report.violations}</div>
                         </div>
                       </div>
 
                       <div>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-foreground-muted">Compliance Score</span>
-                          <span className="text-card-foreground font-medium">{report.score}%</span>
+                          <span className="text-foreground-muted text-xs">Compliance Score</span>
+                          <span className="text-card-foreground font-medium text-xs">{report.score}%</span>
                         </div>
                         <div className="w-full bg-background-subtle rounded-full h-2">
                           <div 
-                            className={`h-2 rounded-full ${
+                            className={`h-2 rounded-full transition-all ${
                               report.score >= 95 ? 'bg-success' :
                               report.score >= 85 ? 'bg-warning' :
                               'bg-error'
@@ -496,11 +517,25 @@ const Audit = () => {
                       </div>
 
                       <div className="flex gap-2 pt-2">
-                        <Button size="sm" variant="outline" className="flex-1 glass-button">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 glass-button text-xs"
+                          onClick={() => {
+                            alert(`Viewing report: ${report.name}\n\nType: ${report.type}\nEvents: ${report.events}\nViolations: ${report.violations}\nScore: ${report.score}%\nStatus: ${report.status}`);
+                          }}
+                        >
                           <Eye className="w-3 h-3 mr-1" />
                           View
                         </Button>
-                        <Button size="sm" variant="outline" className="glass-button">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="glass-button"
+                          onClick={() => {
+                            alert(`Downloading report: ${report.name}\n\nThis would trigger a download of the compliance report in PDF format.`);
+                          }}
+                        >
                           <Download className="w-3 h-3" />
                         </Button>
                       </div>

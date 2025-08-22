@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const auditEvents = [
   {
@@ -110,20 +111,20 @@ export const AuditTrail = () => {
 
   return (
     <Card className="glass-card border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6 text-primary" />
-            Audit Trail
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+            <span className="text-lg truncate">Audit Trail</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="glass-button gap-2">
               <Filter className="w-4 h-4" />
-              Filter
+              <span className="hidden sm:inline">Filter</span>
             </Button>
             <Button variant="outline" size="sm" className="glass-button gap-2">
               <Download className="w-4 h-4" />
-              Export
+              <span className="hidden sm:inline">Export</span>
             </Button>
           </div>
         </CardTitle>
@@ -147,43 +148,45 @@ export const AuditTrail = () => {
           {filteredEvents.map((event) => (
             <div key={event.id} className="glass-card p-4 rounded-lg border border-border-hover">
               {/* Event Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-start gap-3 flex-1">
-                  {getSeverityIcon(event.severity)}
+              <div className="flex items-start justify-between mb-3 gap-3">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="flex-shrink-0 mt-0.5">
+                    {getSeverityIcon(event.severity)}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-card-foreground mb-1">
+                    <h3 className="font-medium text-card-foreground mb-1 text-sm sm:text-base truncate">
                       {event.event}
                     </h3>
-                    <p className="text-sm text-foreground-muted mb-2">
+                    <p className="text-xs sm:text-sm text-foreground-muted mb-2 line-clamp-2">
                       {event.details}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-foreground-muted">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-foreground-muted">
                       <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {event.timestamp}
+                        <Clock className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{event.timestamp}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         {event.actorType === 'agent' ? (
-                          <Bot className="w-3 h-3" />
+                          <Bot className="w-3 h-3 flex-shrink-0" />
                         ) : (
-                          <User className="w-3 h-3" />
+                          <User className="w-3 h-3 flex-shrink-0" />
                         )}
-                        {event.actor}
+                        <span className="truncate">{event.actor}</span>
                       </div>
-                      <div>
+                      <div className="truncate">
                         Workflow: {event.workflow}
                       </div>
                     </div>
                   </div>
                 </div>
-                <Badge className={`${getSeverityColor(event.severity)} border-0`}>
+                <Badge className={cn(getSeverityColor(event.severity), "border-0 text-xs shrink-0")}>
                   {event.severity}
                 </Badge>
               </div>
 
               {/* Tools Used */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs text-foreground-muted">Tools:</span>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-xs text-foreground-muted shrink-0">Tools:</span>
                 {event.tools.map((tool) => (
                   <Badge key={tool} variant="outline" className="text-xs">
                     {tool}
@@ -193,14 +196,14 @@ export const AuditTrail = () => {
 
               {/* Metadata */}
               <div className="glass-card p-3 rounded bg-background-subtle/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   {Object.entries(event.metadata).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-foreground-muted capitalize">
+                    <div key={key} className="flex justify-between items-center gap-2">
+                      <span className="text-foreground-muted capitalize truncate">
                         {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
                       </span>
-                      <span className="text-card-foreground font-medium">
-                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+                      <span className="text-card-foreground font-medium text-right">
+                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
                       </span>
                     </div>
                   ))}

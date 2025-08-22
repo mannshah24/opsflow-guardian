@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const workflows = [
   {
@@ -59,17 +60,17 @@ export const WorkflowInterface = () => {
 
   return (
     <Card className="glass-card border-0 h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-6 h-6 text-primary" />
-          Active Workflows
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+          <span className="truncate">Active Workflows</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         {/* Quick Workflow Creation */}
         <div className="glass-card p-4 rounded-lg">
           <h3 className="text-sm font-medium mb-3 text-card-foreground">Create New Workflow</h3>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Describe what you want to automate..."
               value={newWorkflow}
@@ -80,7 +81,8 @@ export const WorkflowInterface = () => {
             <Button 
               onClick={handleCreateWorkflow} 
               disabled={!newWorkflow.trim() || isCreating}
-              className="bg-primary hover:bg-primary-dark"
+              className="bg-primary hover:bg-primary-dark shrink-0"
+              size="sm"
             >
               {isCreating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -96,16 +98,19 @@ export const WorkflowInterface = () => {
           {workflows.map((workflow) => (
             <div key={workflow.id} className="glass-card p-4 rounded-lg border border-border-hover">
               {/* Workflow Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-card-foreground mb-1">
+              <div className="flex items-start justify-between mb-4 gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-card-foreground mb-1 truncate">
                     {workflow.title}
                   </h3>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Badge 
                       variant={workflow.status === 'running' ? 'default' : 'secondary'}
-                      className={workflow.status === 'running' ? 'bg-primary/20 text-primary' : 
-                               workflow.status === 'waiting_approval' ? 'bg-warning/20 text-warning' : ''}
+                      className={cn(
+                        "text-xs",
+                        workflow.status === 'running' ? 'bg-primary/20 text-primary' : 
+                        workflow.status === 'waiting_approval' ? 'bg-warning/20 text-warning' : ''
+                      )}
                     >
                       {workflow.status === 'running' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                       {workflow.status === 'waiting_approval' && <Clock className="w-3 h-3 mr-1" />}
@@ -116,9 +121,12 @@ export const WorkflowInterface = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="glass-button">
-                    {workflow.status === 'running' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="sm" className="glass-button p-2 h-auto">
+                    {workflow.status === 'running' ? 
+                      <Pause className="w-4 h-4" /> : 
+                      <Play className="w-4 h-4" />
+                    }
                   </Button>
                 </div>
               </div>
@@ -143,17 +151,22 @@ export const WorkflowInterface = () => {
               <div className="space-y-2 mb-4">
                 {workflow.steps.slice(0, 3).map((step, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
-                    {step.status === 'completed' && (
-                      <CheckCircle className="w-4 h-4 text-success" />
-                    )}
-                    {step.status === 'running' && (
-                      <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                    )}
-                    {step.status === 'pending' && (
-                      <div className="w-4 h-4 rounded-full border-2 border-border"></div>
-                    )}
-                    <span className={step.status === 'completed' ? 'text-success' : 
-                                   step.status === 'running' ? 'text-primary' : 'text-foreground-muted'}>
+                    <div className="flex-shrink-0">
+                      {step.status === 'completed' && (
+                        <CheckCircle className="w-4 h-4 text-success" />
+                      )}
+                      {step.status === 'running' && (
+                        <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                      )}
+                      {step.status === 'pending' && (
+                        <div className="w-4 h-4 rounded-full border-2 border-border"></div>
+                      )}
+                    </div>
+                    <span className={cn(
+                      "truncate",
+                      step.status === 'completed' ? 'text-success' : 
+                      step.status === 'running' ? 'text-primary' : 'text-foreground-muted'
+                    )}>
                       {step.name}
                     </span>
                   </div>

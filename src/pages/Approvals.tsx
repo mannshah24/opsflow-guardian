@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   CheckCircle, 
   XCircle, 
@@ -149,6 +150,7 @@ const getPriorityColor = (priority: string) => {
 };
 
 const Approvals = () => {
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRisk, setSelectedRisk] = useState('all');
   const [expandedApproval, setExpandedApproval] = useState<string | null>(null);
@@ -160,31 +162,42 @@ const Approvals = () => {
 
   const handleApprove = (id: string) => {
     console.log('Approved:', id);
-    // Handle approval logic
+    const approval = pendingApprovals.find(a => a.id === id);
+    if (approval) {
+      if (confirm(`Are you sure you want to approve and execute "${approval.title}"?`)) {
+        alert(`✅ Approved: ${approval.title}\nWorkflow execution started...`);
+      }
+    }
   };
 
   const handleReject = (id: string) => {
     console.log('Rejected:', id); 
-    // Handle rejection logic
+    const approval = pendingApprovals.find(a => a.id === id);
+    if (approval) {
+      const reason = prompt('Please provide a reason for rejection:');
+      if (reason) {
+        alert(`❌ Rejected: ${approval.title}\nReason: ${reason}`);
+      }
+    }
   };
 
   const riskLevels = ['all', 'low', 'medium', 'high', 'critical'];
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold gradient-text">Approval Center</h1>
-            <p className="text-foreground-muted mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold gradient-text">Approval Center</h1>
+            <p className="text-foreground-muted mt-1 text-sm sm:text-base">
               Review and approve workflow executions with full context and risk assessment
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button variant="outline" className="glass-button gap-2">
               <CheckCheck className="w-4 h-4" />
-              Bulk Approve
+              {isMobile ? "Bulk" : "Bulk Approve"}
             </Button>
             <Button variant="outline" className="glass-button gap-2">
               <Filter className="w-4 h-4" />
@@ -194,16 +207,16 @@ const Approvals = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-warning/20 rounded-lg">
-                  <Clock className="w-5 h-5 text-warning" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-warning/20 rounded-lg">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Pending</p>
-                  <p className="text-2xl font-bold text-card-foreground">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">Pending</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">
                     {pendingApprovals.length}
                   </p>
                 </div>
@@ -212,28 +225,28 @@ const Approvals = () => {
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-success/20 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-success" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-success/20 rounded-lg">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Approved Today</p>
-                  <p className="text-2xl font-bold text-card-foreground">23</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Approved Today</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">23</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-error/20 rounded-lg">
-                  <AlertTriangle className="w-5 h-5 text-error" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-error/20 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-error" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">High Risk</p>
-                  <p className="text-2xl font-bold text-card-foreground">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted">High Risk</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">
                     {pendingApprovals.filter(a => a.riskLevel === 'high' || a.riskLevel === 'critical').length}
                   </p>
                 </div>
@@ -242,14 +255,14 @@ const Approvals = () => {
           </Card>
 
           <Card className="glass-card border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <Zap className="w-5 h-5 text-primary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 bg-primary/20 rounded-lg">
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-foreground-muted">Avg Response</p>
-                  <p className="text-2xl font-bold text-card-foreground">2.4m</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-foreground-muted truncate">Avg Response</p>
+                  <p className="text-lg sm:text-2xl font-bold text-card-foreground">2.4m</p>
                 </div>
               </div>
             </CardContent>
@@ -265,7 +278,7 @@ const Approvals = () => {
 
           <TabsContent value="pending" className="space-y-6 mt-6">
             {/* Search and Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
                 <Input
@@ -275,14 +288,14 @@ const Approvals = () => {
                   className="pl-10"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
                 {riskLevels.map((risk) => (
                   <Button
                     key={risk}
                     variant={selectedRisk === risk ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedRisk(risk)}
-                    className={selectedRisk === risk ? "" : "glass-button"}
+                    className={`${selectedRisk === risk ? "" : "glass-button"} whitespace-nowrap`}
                   >
                     {risk === 'all' ? 'All Risk' : risk}
                   </Button>
@@ -296,36 +309,38 @@ const Approvals = () => {
                 <Card key={approval.id} className={`glass-card border-0 ${
                   approval.riskLevel === 'critical' ? 'ring-1 ring-error/50' : ''
                 }`}>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-card-foreground">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                          <h3 className="text-base sm:text-lg font-semibold text-card-foreground leading-tight">
                             {approval.title}
                           </h3>
-                          <Badge className={`${getRiskColor(approval.riskLevel)} text-xs`}>
-                            {approval.riskLevel === 'critical' && <AlertTriangle className="w-3 h-3 mr-1" />}
-                            {approval.riskLevel} risk
-                          </Badge>
-                          <Badge className={getPriorityColor(approval.priority)}>
-                            {approval.priority}
-                          </Badge>
+                          <div className="flex gap-2 flex-wrap">
+                            <Badge className={`${getRiskColor(approval.riskLevel)} text-xs`}>
+                              {approval.riskLevel === 'critical' && <AlertTriangle className="w-3 h-3 mr-1" />}
+                              {approval.riskLevel} risk
+                            </Badge>
+                            <Badge className={getPriorityColor(approval.priority)}>
+                              {approval.priority}
+                            </Badge>
+                          </div>
                         </div>
                         <p className="text-sm text-foreground-muted mb-3">
                           {approval.description}
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-foreground-muted">
-                          <div className="flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            {approval.requestedBy}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-foreground-muted">
+                          <div className="flex items-center gap-1 truncate">
+                            <User className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{approval.requestedBy}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {approval.requestedAt}
+                            <Clock className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{approval.requestedAt}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Zap className="w-3 h-3" />
+                            <Zap className="w-3 h-3 flex-shrink-0" />
                             Est. {approval.estimatedTime}
                           </div>
                         </div>
@@ -333,7 +348,7 @@ const Approvals = () => {
                     </div>
 
                     {/* Impact and Compliance */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4">
                       <div className="glass-card p-3 rounded-lg">
                         <h4 className="text-xs font-medium text-card-foreground mb-1">Business Impact</h4>
                         <p className="text-xs text-foreground-muted">{approval.impact}</p>
@@ -407,32 +422,37 @@ const Approvals = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="flex-1 glass-button gap-2"
+                        className="flex-1 glass-button gap-2 min-h-[36px]"
+                        onClick={() => {
+                          console.log('Viewing details for:', approval.id);
+                          alert(`Viewing details for approval: ${approval.title}`);
+                        }}
                       >
                         <Eye className="w-4 h-4" />
-                        Review Details
+                        {isMobile ? "Details" : "Review Details"}
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleReject(approval.id)}
-                        className="glass-button text-error border-error/50 hover:bg-error/10 px-3"
+                        className="glass-button text-error border-error/50 hover:bg-error/10 px-3 sm:px-4 min-h-[36px]"
                       >
                         <X className="w-4 h-4" />
+                        {!isMobile && <span className="ml-1">Reject</span>}
                       </Button>
                       <Button 
                         size="sm"
                         onClick={() => handleApprove(approval.id)}
-                        className={`bg-success hover:bg-success/90 text-white px-6 ${
+                        className={`bg-success hover:bg-success/90 text-white px-4 sm:px-6 min-h-[36px] ${
                           approval.riskLevel === 'critical' ? 'animate-glow' : ''
                         }`}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Approve & Execute
+                        {isMobile ? "Approve" : "Approve & Execute"}
                       </Button>
                     </div>
                   </CardContent>
