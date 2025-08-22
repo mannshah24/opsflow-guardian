@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   Search, 
@@ -9,78 +9,15 @@ import {
   Info,
   Clock,
   User,
-  Bot
+  Bot,
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
-const auditEvents = [
-  {
-    id: 'audit-001',
-    timestamp: '2024-01-15 14:32:15',
-    event: 'Workflow Execution Started',
-    details: 'Vendor onboarding workflow initiated for Acme Corp',
-    actor: 'Planner Agent',
-    actorType: 'agent',
-    severity: 'info',
-    workflow: 'wf-001',
-    tools: ['Google Drive', 'Notion'],
-    metadata: {
-      approvedBy: 'admin@company.com',
-      riskLevel: 'low',
-      executionId: 'exec-12345'
-    }
-  },
-  {
-    id: 'audit-002', 
-    timestamp: '2024-01-15 14:32:45',
-    event: 'Tool Authentication Success',
-    details: 'Successfully authenticated with Google Drive API',
-    actor: 'Executor Agent',
-    actorType: 'agent',
-    severity: 'success',
-    workflow: 'wf-001',
-    tools: ['Google Drive'],
-    metadata: {
-      apiEndpoint: '/drive/v3/files',
-      responseTime: '245ms'
-    }
-  },
-  {
-    id: 'audit-003',
-    timestamp: '2024-01-15 14:31:20',
-    event: 'Approval Granted',
-    details: 'Employee onboarding workflow approved by HR team',
-    actor: 'jane.doe@company.com',
-    actorType: 'user',
-    severity: 'success', 
-    workflow: 'wf-002',
-    tools: ['Gmail', 'Slack', 'GitHub'],
-    metadata: {
-      approvalTime: '2m 15s',
-      riskAssessment: 'low'
-    }
-  },
-  {
-    id: 'audit-004',
-    timestamp: '2024-01-15 14:30:15',
-    event: 'Security Policy Violation',
-    details: 'Attempted to access restricted endpoint without proper authorization',
-    actor: 'Executor Agent',
-    actorType: 'agent',
-    severity: 'warning',
-    workflow: 'wf-003',
-    tools: ['AWS Console'],
-    metadata: {
-      endpoint: '/admin/users',
-      blocked: true,
-      policyId: 'pol-security-001'
-    }
-  }
-];
+import { apiService, type AuditEvent } from '@/services/api';
 
 const getSeverityIcon = (severity: string) => {
   switch (severity) {
@@ -103,9 +40,30 @@ const getSeverityColor = (severity: string) => {
 export const AuditTrail = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAuditEvents = async () => {
+      try {
+        const events = await apiService.getAuditEvents();
+        setAuditEvents(events);
+      } catch (error) {
+        console.error('Failed to fetch audit events:', error);
+        // Keep empty array if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuditEvents();
+    // Refresh every 15 seconds
+    const interval = setInterval(fetchAuditEvents, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filteredEvents = auditEvents.filter(event => 
-    event.event.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
     event.details.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -143,80 +101,90 @@ export const AuditTrail = () => {
           </div>
         </div>
 
-        {/* Events Timeline */}
-        <div className="space-y-4">
-          {filteredEvents.map((event) => (
-            <div key={event.id} className="glass-card p-4 rounded-lg border border-border-hover">
-              {/* Event Header */}
-              <div className="flex items-start justify-between mb-3 gap-3">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="flex-shrink-0 mt-0.5">
-                    {getSeverityIcon(event.severity)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-card-foreground mb-1 text-sm sm:text-base truncate">
-                      {event.event}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-foreground-muted mb-2 line-clamp-2">
-                      {event.details}
-                    </p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-foreground-muted">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">{event.timestamp}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {event.actorType === 'agent' ? (
-                          <Bot className="w-3 h-3 flex-shrink-0" />
-                        ) : (
-                          <User className="w-3 h-3 flex-shrink-0" />
-                        )}
-                        <span className="truncate">{event.actor}</span>
-                      </div>
-                      <div className="truncate">
-                        Workflow: {event.workflow}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <Badge className={cn(getSeverityColor(event.severity), "border-0 text-xs shrink-0")}>
-                  {event.severity}
-                </Badge>
-              </div>
-
-              {/* Tools Used */}
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-xs text-foreground-muted shrink-0">Tools:</span>
-                {event.tools.map((tool) => (
-                  <Badge key={tool} variant="outline" className="text-xs">
-                    {tool}
-                  </Badge>
-                ))}
-              </div>
-
-              {/* Metadata */}
-              <div className="glass-card p-3 rounded bg-background-subtle/50">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {Object.entries(event.metadata).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center gap-2">
-                      <span className="text-foreground-muted capitalize truncate">
-                        {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
-                      </span>
-                      <span className="text-card-foreground font-medium text-right">
-                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+              <p className="text-foreground-muted">Loading audit events...</p>
             </div>
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
+          </div>
+        ) : filteredEvents.length === 0 ? (
           <div className="text-center py-8">
             <Shield className="w-12 h-12 text-foreground-muted mx-auto mb-2 opacity-50" />
-            <p className="text-foreground-muted">No audit events found</p>
+            <p className="text-foreground-muted">
+              {auditEvents.length === 0 ? 'No audit events available' : 'No matching events found'}
+            </p>
+          </div>
+        ) : (
+          /* Events Timeline */
+          <div className="space-y-4">
+            {filteredEvents.map((event) => (
+              <div key={event.id} className="glass-card p-4 rounded-lg border border-border-hover">
+                {/* Event Header */}
+                <div className="flex items-start justify-between mb-3 gap-3">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getSeverityIcon(event.severity)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-card-foreground mb-1 text-sm sm:text-base truncate">
+                        {event.action}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-foreground-muted mb-2 line-clamp-2">
+                        {event.event_type}
+                      </p>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-foreground-muted">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{new Date(event.timestamp).toLocaleString()}</span>
+                        </div>
+                        {event.user_id && (
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{event.user_id}</span>
+                          </div>
+                        )}
+                        {event.resource_id && (
+                          <div className="truncate">
+                            Resource: {event.resource_id}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 shrink-0">
+                    <Badge className={cn(getSeverityColor(event.severity), "border-0 text-xs")}>
+                      {event.severity}
+                    </Badge>
+                    <Badge 
+                      variant={event.compliance_status === 'compliant' ? 'default' : 
+                               event.compliance_status === 'violation' ? 'destructive' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {event.compliance_status}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Event Details */}
+                {event.details && Object.keys(event.details).length > 0 && (
+                  <div className="glass-card p-3 rounded bg-background-subtle/50">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {Object.entries(event.details).slice(0, 6).map(([key, value]) => (
+                        <div key={key} className="flex justify-between items-center gap-2">
+                          <span className="text-foreground-muted capitalize truncate">
+                            {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
+                          </span>
+                          <span className="text-card-foreground font-medium text-right">
+                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </CardContent>

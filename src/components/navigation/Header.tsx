@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, User, Search, Command, Menu, LogOut, Settings, UserCircle, Mail, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,38 +17,11 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { apiService, type Notification } from '@/services/api';
 
 interface HeaderProps {
   onMenuClick?: () => void;
 }
-
-// Mock notifications data
-const notifications = [
-  {
-    id: '1',
-    type: 'approval',
-    title: 'Workflow Approval Required',
-    message: 'Employee onboarding workflow needs your approval',
-    time: '2 mins ago',
-    unread: true
-  },
-  {
-    id: '2',
-    type: 'completion',
-    title: 'Workflow Completed',
-    message: 'Vendor onboarding for Acme Corp has completed successfully',
-    time: '15 mins ago',
-    unread: true
-  },
-  {
-    id: '3',
-    type: 'error',
-    title: 'Workflow Failed',
-    message: 'Database backup workflow encountered an error',
-    time: '1 hour ago',
-    unread: false
-  }
-];
 
 const quickActions = [
   { label: 'New Workflow', action: 'create-workflow' },
@@ -60,21 +33,48 @@ const quickActions = [
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await apiService.getNotifications();
+        setNotifications(data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+        // Keep empty array if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+    
+    // Refresh notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const unreadCount = notifications.filter(n => n.unread).length;
 
   const handleQuickAction = (action: string) => {
     switch (action) {
       case 'create-workflow':
-        alert('🚀 Opening workflow creation wizard...');
+        // Navigate to workflow creation
+        window.location.href = '/workflows';
         break;
       case 'approve-all':
-        alert('✅ Approving all pending workflows...');
+        // Navigate to approvals page
+        window.location.href = '/approvals';
         break;
       case 'view-agents':
-        alert('🤖 Opening agent monitoring dashboard...');
+        // Navigate to agents page
+        window.location.href = '/agents';
         break;
       case 'system-status':
-        alert('📊 Opening system status dashboard...');
+        // Navigate to analytics page
+        window.location.href = '/analytics';
         break;
       default:
         break;
@@ -82,19 +82,38 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   const handleNotificationClick = (notificationId: string) => {
-    alert(`Opening notification: ${notificationId}`);
+    // Mark notification as read and navigate based on type
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+      // Mark as read
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, unread: false } : n)
+      );
+      
+      // Navigate based on notification type
+      switch (notification.type) {
+        case 'approval':
+          window.location.href = '/approvals';
+          break;
+        case 'workflow':
+          window.location.href = '/workflows';
+          break;
+        case 'agent':
+          window.location.href = '/agents';
+          break;
+        default:
+          window.location.href = '/audit';
+          break;
+      }
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      alert(`Searching for: ${searchQuery}`);
-    }
-  };
-
-  const handleLogout = () => {
-    if (confirm('Are you sure you want to logout?')) {
-      alert('🔐 Logging out... (This would redirect to login page)');
+      // Perform global search across the application
+      const params = new URLSearchParams({ q: searchQuery.trim() });
+      window.location.href = `/search?${params.toString()}`;
     }
   };
 
@@ -102,6 +121,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     // Navigate to authentication pages
     window.location.href = `/${action}`;
   };
+
+  // Check if user is authenticated (for demo purposes, we'll assume they're not)
+  const isAuthenticated = false; // This would normally check localStorage/session
 
   return (
     <header className="h-14 sm:h-16 bg-card border-b border-border px-3 sm:px-6 flex items-center justify-between gap-3">
@@ -244,27 +266,34 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Account Options</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleAuthAction('login')} className="cursor-pointer">
-              <Mail className="w-4 h-4 mr-2" />
-              Login
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAuthAction('signup')} className="cursor-pointer">
-              <UserCircle className="w-4 h-4 mr-2" />
-              Sign Up
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => alert('Opening profile settings...')} className="cursor-pointer">
+            {!isAuthenticated ? (
+              <>
+                <DropdownMenuItem onClick={() => handleAuthAction('login')} className="cursor-pointer">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Login
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAuthAction('signup')} className="cursor-pointer">
+                  <UserCircle className="w-4 h-4 mr-2" />
+                  Sign Up
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            ) : (
+              <>
+                <DropdownMenuItem onClick={() => window.location.href = '/profile'} className="cursor-pointer">
+                  <UserCircle className="w-4 h-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem onClick={() => window.location.href = '/settings'} className="cursor-pointer">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => alert('Opening help center...')} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => window.location.href = '/help'} className="cursor-pointer">
               <MessageSquare className="w-4 h-4 mr-2" />
               Help & Support
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-error">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

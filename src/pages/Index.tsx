@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { AgentMonitor } from '@/components/agents/AgentMonitor';
 import { WorkflowInterface } from '@/components/workflow/WorkflowInterface';
 import { ApprovalCenter } from '@/components/approval/ApprovalCenter';
 import { AuditTrail } from '@/components/audit/AuditTrail';
+import { apiService } from '@/services/api';
 
 const Index = () => {
+  const [stats, setStats] = useState({
+    activeAgents: 0,
+    runningWorkflows: 0,
+    pendingApprovals: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [agents, workflows, approvals] = await Promise.all([
+          apiService.getAgents(),
+          apiService.getWorkflows(), 
+          apiService.getApprovals()
+        ]);
+
+        setStats({
+          activeAgents: agents.filter(a => a.status === 'active' || a.status === 'working').length,
+          runningWorkflows: workflows.filter(w => w.status === 'running').length,
+          pendingApprovals: approvals.filter(a => a.status === 'pending').length
+        });
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+        // Keep default values on error
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6 sm:gap-8 p-4 sm:p-6">
@@ -22,15 +54,15 @@ const Index = () => {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
                 <div className="glass-card p-4 rounded-lg">
-                  <div className="text-2xl sm:text-3xl font-bold text-secondary mb-2">3</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-secondary mb-2">{stats.activeAgents}</div>
                   <div className="text-xs sm:text-sm foreground-muted">Active Agents</div>
                 </div>
                 <div className="glass-card p-4 rounded-lg">
-                  <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">12</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">{stats.runningWorkflows}</div>
                   <div className="text-xs sm:text-sm foreground-muted">Workflows Running</div>
                 </div>
                 <div className="glass-card p-4 rounded-lg">
-                  <div className="text-2xl sm:text-3xl font-bold text-warning mb-2">2</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-warning mb-2">{stats.pendingApprovals}</div>
                   <div className="text-xs sm:text-sm foreground-muted">Pending Approvals</div>
                 </div>
               </div>

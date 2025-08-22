@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Play, 
   Pause, 
@@ -7,61 +7,106 @@ import {
   AlertCircle, 
   FileText,
   Send,
-  Loader2
+  Loader2,
+  ArrowLeft,
+  Bot
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { apiService, type Workflow } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
-const workflows = [
-  {
-    id: 'wf-001',
-    title: 'Vendor Onboarding: Acme Corp',
-    status: 'running',
-    progress: 65,
-    steps: [
-      { name: 'Create folder structure', status: 'completed' },
-      { name: 'Setup Notion workspace', status: 'running' },
-      { name: 'Send welcome email', status: 'pending' },
-      { name: 'Schedule onboarding call', status: 'pending' }
-    ],
-    estimatedTime: '2 min remaining',
-    tools: ['Google Drive', 'Notion', 'Gmail', 'Calendar']
-  },
-  {
-    id: 'wf-002',
-    title: 'Employee Onboarding: Sarah Chen',
-    status: 'waiting_approval',
-    progress: 0,
-    steps: [
-      { name: 'Create email account', status: 'pending' },
-      { name: 'Setup development environment', status: 'pending' },
-      { name: 'Add to Slack channels', status: 'pending' },
-      { name: 'Schedule orientation', status: 'pending' }
-    ],
-    estimatedTime: '5 min estimated',
-    tools: ['Gmail', 'GitHub', 'Slack', 'Calendar']
-  }
-];
+interface WorkflowInterfaceProps {
+  onBack?: () => void;
+  onWorkflowCreated?: (description: string) => Promise<void>;
+}
 
-export const WorkflowInterface = () => {
-  const [newWorkflow, setNewWorkflow] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({ 
+  onBack, 
+  onWorkflowCreated 
+}) => {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
+  const [creating, setCreating] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchWorkflows = async () => {
+      try {
+        const workflowsData = await apiService.getWorkflows();
+        // Show only running workflows in the interface
+        setWorkflows(workflowsData.filter(w => w.status === 'running' || w.status === 'pending'));
+      } catch (error) {
+        console.error('Failed to fetch workflows:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWorkflows();
+    const interval = setInterval(fetchWorkflows, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCreateWorkflow = async () => {
-    setIsCreating(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsCreating(false);
-    setNewWorkflow('');
+    if (!newWorkflowDescription.trim()) {
+      toast({
+        title: "Description required",
+        description: "Please describe what you want to automate",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreating(true);
+    try {
+      if (onWorkflowCreated) {
+        await onWorkflowCreated(newWorkflowDescription.trim());
+      } else {
+        // Fallback: create workflow directly
+        await apiService.createWorkflow(newWorkflowDescription.trim());
+        
+        // Refresh workflows
+        const workflowsData = await apiService.getWorkflows();
+        setWorkflows(workflowsData.filter(w => w.status === 'running' || w.status === 'pending'));
+        
+        toast({
+          title: "Workflow created!",
+          description: "Your workflow has been created and is ready for execution.",
+        });
+      }
+      setNewWorkflowDescription('');
+    } catch (error) {
+      console.error('Failed to create workflow:', error);
+      toast({
+        title: "Creation failed",
+        description: "Failed to create workflow. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
     <Card className="glass-card border-0 h-full">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="mr-2 h-8 w-8 p-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          )}
           <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
           <span className="truncate">Active Workflows</span>
         </CardTitle>
@@ -73,18 +118,18 @@ export const WorkflowInterface = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Describe what you want to automate..."
-              value={newWorkflow}
-              onChange={(e) => setNewWorkflow(e.target.value)}
+              value={newWorkflowDescription}
+              onChange={(e) => setNewWorkflowDescription(e.target.value)}
               className="flex-1"
-              disabled={isCreating}
+              disabled={creating}
             />
             <Button 
               onClick={handleCreateWorkflow} 
-              disabled={!newWorkflow.trim() || isCreating}
+              disabled={!newWorkflowDescription.trim() || creating}
               className="bg-primary hover:bg-primary-dark shrink-0"
               size="sm"
             >
-              {isCreating ? (
+              {creating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
@@ -101,7 +146,7 @@ export const WorkflowInterface = () => {
               <div className="flex items-start justify-between mb-4 gap-3">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-card-foreground mb-1 truncate">
-                    {workflow.title}
+                    {workflow.name}
                   </h3>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Badge 
@@ -109,15 +154,15 @@ export const WorkflowInterface = () => {
                       className={cn(
                         "text-xs",
                         workflow.status === 'running' ? 'bg-primary/20 text-primary' : 
-                        workflow.status === 'waiting_approval' ? 'bg-warning/20 text-warning' : ''
+                        workflow.status === 'pending' ? 'bg-warning/20 text-warning' : ''
                       )}
                     >
                       {workflow.status === 'running' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
-                      {workflow.status === 'waiting_approval' && <Clock className="w-3 h-3 mr-1" />}
+                      {workflow.status === 'pending' && <Clock className="w-3 h-3 mr-1" />}
                       {workflow.status.replace('_', ' ')}
                     </Badge>
                     <span className="text-xs text-foreground-muted">
-                      {workflow.estimatedTime}
+                      {Math.round(workflow.estimated_duration / 60)}m
                     </span>
                   </div>
                 </div>
@@ -136,12 +181,12 @@ export const WorkflowInterface = () => {
                 <div className="mb-4">
                   <div className="flex justify-between text-xs text-foreground-muted mb-1">
                     <span>Progress</span>
-                    <span>{workflow.progress}%</span>
+                    <span>{Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) || 0}%</span>
                   </div>
                   <div className="w-full bg-background-subtle rounded-full h-2">
                     <div 
                       className="bg-gradient-primary h-2 rounded-full transition-all duration-300 animate-shimmer"
-                      style={{ width: `${workflow.progress}%` }}
+                      style={{ width: `${Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) || 0}%` }}
                     ></div>
                   </div>
                 </div>
@@ -180,9 +225,9 @@ export const WorkflowInterface = () => {
 
               {/* Tools */}
               <div className="flex flex-wrap gap-1">
-                {workflow.tools.map((tool) => (
-                  <Badge key={tool} variant="outline" className="text-xs">
-                    {tool}
+                {workflow.integrations_used.map((integration) => (
+                  <Badge key={integration} variant="outline" className="text-xs">
+                    {integration}
                   </Badge>
                 ))}
               </div>

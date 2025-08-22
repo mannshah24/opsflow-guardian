@@ -185,9 +185,22 @@ const Agents = () => {
                 <div>
                   <p className="text-xs sm:text-sm text-foreground-muted">Avg Response</p>
                   <p className="text-xl sm:text-2xl font-bold text-card-foreground">
-                    {agents.length > 0 
-                      ? `${(agents.reduce((acc, agent) => acc + (agent.avg_response_time || 0), 0) / agents.length).toFixed(1)}s`
-                      : 'N/A'}
+                    {agents.length > 0 ? 
+                      agents.reduce((sum, a) => {
+                        // avg_response_time is already a number in seconds
+                        const timeValue = a.avg_response_time || 0;
+                        return sum + timeValue;
+                      }, 0) / agents.length < 1 ?
+                        `${((agents.reduce((sum, a) => {
+                          const timeValue = a.avg_response_time || 0;
+                          return sum + timeValue;
+                        }, 0) / agents.length) * 1000).toFixed(0)}ms` :
+                        `${(agents.reduce((sum, a) => {
+                          const timeValue = a.avg_response_time || 0;
+                          return sum + timeValue;
+                        }, 0) / agents.length).toFixed(1)}s`
+                      : 'N/A'
+                    }
                   </p>
                 </div>
               </div>
