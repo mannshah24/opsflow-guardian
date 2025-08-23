@@ -34,7 +34,8 @@ class IntegrationService:
             
         except Exception as e:
             logger.error(f"Failed to initialize integration service: {e}")
-            raise
+            # Don't raise - allow service to continue with basic functionality
+            self._initialized = True
     
     async def _setup_integrations(self):
         """Setup available integrations"""

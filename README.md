@@ -1,6 +1,18 @@
-# OpsFlow Guardian
+# 🤖 OpsFlow Guardian 2.0 - AI-Powered Workflow Automation
+
+**Powered by Google Gemini 2.5 Pro** | Multi-Agent Orchestration | Real-Time Monitoring | Enterprise Security
+
+> **✨ Now featuring Google Gemini 2.5 Pro for cost-effective, high-performance AI automation!**
 
 OpsFlow Guardian is an AI-powered workflow automation platform that combines multi-agent AI capabilities with human oversight and complete audit trails. Built to solve the enterprise automation trust gap with transparency, steerability, and authenticated operations.
+
+## 🚀 Why Gemini 2.5 Pro?
+
+- **💰 Cost Effective**: ~90% cheaper than OpenAI ($0.00025 vs $0.03 per 1K tokens)
+- **🧠 Advanced Reasoning**: Latest Google AI with superior planning capabilities  
+- **📚 2M Token Context**: Handle complex workflows with massive context windows
+- **⚡ High Performance**: Fast response times with reliable availability
+- **🔒 Enterprise Ready**: Google-grade security and privacy standards
 
 ## Project Overview
 
@@ -28,7 +40,36 @@ npm i
 npm run dev
 ```
 
-**Backend Setup**
+**Backend Setup (with Gemini 2.5 Pro)**
+
+```sh
+# Step 1: Navigate to backend directory
+cd backend
+
+# Step 2: Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Step 3: Install dependencies
+pip install -r requirements.txt
+
+# Step 4: Set up environment variables
+cp .env.example .env
+# Edit .env and add your GOOGLE_API_KEY
+
+# Step 5: Test Gemini integration
+python test_gemini.py
+
+# Step 6: Start the backend
+python main.py
+```
+
+**Getting Your Gemini API Key:**
+
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Click "Create API Key"
+3. Copy the key and add it to your `.env` file as `GOOGLE_API_KEY`
+4. The API includes a generous free tier - perfect for development!
 
 The project also includes a Python FastAPI backend. To run the backend:
 

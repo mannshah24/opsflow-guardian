@@ -35,8 +35,12 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
+# Virtual environments & Environment Variables
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .venv
 env/
 venv/
@@ -63,6 +67,35 @@ backend/logs/
 backend/*.db
 backend/uploads/
 backend/temp/
+backend/audit_trails/
+backend/workflow_cache/
+backend/redis_dumps/
+
+# OpsFlow Guardian specific files
+*.audit
+*.workflow
+audit_*.json
+workflow_*.json
+session_*.log
+agent_*.cache
+integration_*.tmp
+
+# API Keys and Secrets (CRITICAL - Never commit these!)
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+api_keys.json
+credentials.json
+token_*.json
+
+# Development and Demo files
+demo_data/
+test_results/
+benchmark_results/
+performance_logs/
+mock_data/
 
 # Editor directories and files
 .vscode/*
@@ -78,6 +111,10 @@ backend/temp/
 # Development and testing scripts (not for production)
 compliance_check.py
 temp_*
-test_*
 debug_*
 scratch_*
+
+# Keep demo and test files but exclude sensitive test results
+test_results/
+demo_outputs/
+integration_test_logs/

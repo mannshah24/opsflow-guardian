@@ -26,6 +26,12 @@ class RedisService:
             return
         
         try:
+            # Check if Redis URL is available
+            if not settings.REDIS_URL:
+                logger.warning("Redis not configured - running without cache")
+                self._initialized = True
+                return
+                
             # Main Redis connection
             self.redis_client = redis.from_url(
                 settings.REDIS_URL,
@@ -36,8 +42,8 @@ class RedisService:
                 socket_keepalive_options={},
             )
             
-            # Cache Redis connection (separate database)
-            cache_url = settings.REDIS_CACHE_URL or settings.REDIS_URL
+            # Cache Redis connection (use same URL if not specified)
+            cache_url = getattr(settings, 'REDIS_CACHE_URL', None) or settings.REDIS_URL
             self.cache_client = redis.from_url(
                 cache_url,
                 encoding="utf-8",

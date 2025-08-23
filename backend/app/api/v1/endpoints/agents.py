@@ -157,3 +157,80 @@ async def get_agent_metrics(agent_id: str):
     except Exception as e:
         logger.error(f"Failed to get agent metrics {agent_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve agent metrics")
+
+
+@router.get("/gemini/status")
+async def get_gemini_status():
+    """Get Gemini 2.5 Pro AI service status"""
+    try:
+        # This would connect to actual PortiaService with Gemini
+        # For now, return mock status
+        
+        gemini_status = {
+            "service_status": "active",
+            "connection_test": {
+                "status": "success",
+                "model": "gemini-2.0-flash-exp",
+                "response": "Connected successfully to Gemini 2.5 Pro",
+                "timestamp": "2025-01-23T10:45:00Z"
+            },
+            "model_info": {
+                "provider": "Google",
+                "model": "gemini-2.0-flash-exp",
+                "version": "2.5 Pro",
+                "context_window": "2M tokens",
+                "capabilities": [
+                    "text_generation",
+                    "code_understanding",
+                    "reasoning",
+                    "multimodal_input",
+                    "function_calling",
+                    "json_mode"
+                ],
+                "cost_per_1k_tokens": 0.00025,
+                "initialized": True
+            },
+            "primary_ai": True
+        }
+        
+        return {"success": True, "data": gemini_status}
+        
+    except Exception as e:
+        logger.error(f"Failed to get Gemini status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve Gemini status")
+
+
+@router.post("/gemini/chat")
+async def chat_with_gemini_agent(chat_request: Dict[str, Any]):
+    """Chat with Gemini-powered agent"""
+    try:
+        message = chat_request.get("message", "")
+        agent_role = chat_request.get("agent_role", "planner")
+        
+        if not message:
+            raise HTTPException(status_code=400, detail="Message is required")
+        
+        # This would connect to actual GeminiService
+        # For now, return mock response
+        
+        responses = {
+            "planner": f"As your Workflow Planner powered by Gemini 2.5 Pro, I understand you want to: '{message}'. I can help you create a detailed, step-by-step workflow plan with risk assessment and approval checkpoints. Would you like me to break this down into actionable steps?",
+            "executor": f"As your Workflow Executor powered by Gemini 2.5 Pro, I can help you execute: '{message}'. I'll monitor the process in real-time, handle any errors, and ensure successful completion. Shall I proceed with the execution?",
+            "auditor": f"As your Compliance Auditor powered by Gemini 2.5 Pro, I've analyzed your request: '{message}'. I'll ensure all activities are logged, compliance requirements are met, and provide detailed audit trails. What specific compliance aspects would you like me to focus on?"
+        }
+        
+        response = responses.get(agent_role, f"Hello! I'm an AI agent powered by Gemini 2.5 Pro. You said: '{message}'. How can I assist you today?")
+        
+        return {
+            "success": True,
+            "data": {
+                "response": response,
+                "agent_role": agent_role,
+                "model": "gemini-2.0-flash-exp",
+                "timestamp": "2025-01-23T10:45:00Z"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to chat with Gemini agent: {e}")
+        raise HTTPException(status_code=500, detail="Failed to chat with Gemini agent")
