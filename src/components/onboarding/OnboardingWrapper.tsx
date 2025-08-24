@@ -15,6 +15,17 @@ const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }) => {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
+        // Check for skip parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const skipOnboarding = urlParams.get('skip') === 'true';
+        
+        if (skipOnboarding) {
+          localStorage.setItem('opsflow-onboarding-completed', 'true');
+          localStorage.removeItem('opsflow-first-time-user');
+          setLoading(false);
+          return;
+        }
+
         // Check if user has completed onboarding
         const hasCompletedOnboarding = localStorage.getItem('opsflow-onboarding-completed');
         const isFirstTimeUser = localStorage.getItem('opsflow-first-time-user');

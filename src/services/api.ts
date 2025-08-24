@@ -3,7 +3,7 @@
  * Centralized API calls to fetch real data from Portia agents
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
 const API_VERSION = '/api/v1';
 
 // Authentication utilities

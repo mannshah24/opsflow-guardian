@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { apiService } from '@/services/api';
 import { 
   User, 
   Mail, 
@@ -93,11 +94,38 @@ export default function Profile() {
 
         if (response.ok) {
           const userData = await response.json();
+          
+          // Fetch company profile to get actual company name
+          let companyName = 'Your Organization';
+          try {
+            const companyProfile = await apiService.getCompanyProfile();
+            console.log('Company profile fetched:', companyProfile);
+            if (companyProfile && companyProfile.companyName) {
+              companyName = companyProfile.companyName;
+            } else if (companyProfile && companyProfile.company_name) {
+              companyName = companyProfile.company_name; // Handle snake_case
+            }
+          } catch (error) {
+            console.log('No company profile found, checking localStorage...');
+            // Fallback: check localStorage for company profile
+            const storedProfile = localStorage.getItem('opsflow-company-profile');
+            if (storedProfile) {
+              try {
+                const parsed = JSON.parse(storedProfile);
+                if (parsed.companyName) {
+                  companyName = parsed.companyName;
+                }
+              } catch (e) {
+                console.log('Failed to parse stored company profile');
+              }
+            }
+          }
+          
           setProfile({
             id: userData.id,
             fullName: userData.name || '',
             email: userData.email || '',
-            organization: 'OpsFlow Guardian', // Default organization
+            organization: companyName, // Use actual company name from onboarding
             role: userData.is_active ? 'Active User' : 'Inactive User',
             avatar: '',
             joined: 'Recently', // We could format created_at if available

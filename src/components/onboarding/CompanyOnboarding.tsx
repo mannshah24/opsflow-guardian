@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
@@ -29,6 +29,19 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Add escape key functionality
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' || (event.ctrlKey && event.key === 'h')) {
+        console.log('Escape key pressed - skipping onboarding');
+        onSkip();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onSkip]);
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -127,8 +140,10 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
   };
 
   const handleNext = () => {
+    console.log(`Current step: ${currentStep}, Can proceed step 3: ${canProceedStep3}`);
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
+      console.log(`Moving to step: ${currentStep + 1}`);
     }
   };
 
@@ -139,6 +154,7 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
   };
 
   const handleSubmit = async () => {
+    console.log('Submitting company profile:', formData);
     setLoading(true);
     try {
       await apiService.saveCompanyProfile(formData);
@@ -152,27 +168,114 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
     } catch (error) {
       console.error('Failed to save company profile:', error);
       toast({
-        title: "Save Failed",
-        description: "Failed to save your profile. You can update it later in Settings.",
+        title: "Save Failed - But Continuing Anyway",
+        description: "Profile couldn't be saved to server, but you can continue to dashboard.",
         variant: "destructive",
       });
+      
+      // Continue to dashboard even if save fails
+      setTimeout(() => {
+        onComplete();
+      }, 2000);
     } finally {
       setLoading(false);
     }
   };
 
+  // Emergency bypass function
+  const handleEmergencySkip = () => {
+    console.log('Emergency skip triggered');
+    toast({
+      title: "Skipping Setup",
+      description: "Going directly to dashboard...",
+    });
+    onSkip();
+  };
+
   const canProceedStep1 = formData.companyName.trim() && formData.industry && formData.size;
   const canProceedStep2 = formData.primaryGoals.length > 0;
   const canProceedStep3 = true; // Allow proceeding to step 4 even with no selections (optional fields)
+  const canComplete = true; // Always allow completion from step 4 (all fields are optional in final step)
+
+  // Debug logging - Enhanced
+  useEffect(() => {
+    console.log('🔍 Onboarding Debug State Update:', {
+      currentStep,
+      canProceedStep1,
+      canProceedStep2, 
+      canProceedStep3,
+      canComplete,
+      loading,
+      showingStep4: currentStep === 4,
+      formData: {
+        companyName: formData.companyName,
+        industry: formData.industry,
+        size: formData.size,
+        primaryGoalsCount: formData.primaryGoals.length,
+        automationNeedsCount: formData.automationNeeds.length,
+        businessProcessesCount: formData.businessProcesses.length,
+      }
+    });
+    
+    if (currentStep === 4) {
+      console.log('✅ STEP 4 ACTIVE - Complete Setup button should be visible!');
+    }
+  }, [currentStep, canProceedStep1, canProceedStep2, canProceedStep3, canComplete, loading, formData]);
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl glass-card border-0 shadow-2xl">
-        <CardHeader className="text-center pb-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-8 h-8 text-primary" />
-            <CardTitle className="text-2xl gradient-text">Welcome to OpsFlow Guardian</CardTitle>
+    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 overflow-y-auto">
+      <div className="min-h-screen flex items-center justify-center p-4 py-8">
+        <Card className="w-full max-w-2xl glass-card border-0 shadow-2xl my-8">
+          <CardHeader className="text-center pb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div></div> {/* Spacer */}
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-8 h-8 text-primary" />
+              <CardTitle className="text-2xl gradient-text">Welcome to OpsFlow Guardian</CardTitle>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onSkip}
+              className="text-xs text-foreground-muted hover:text-foreground"
+            >
+              Skip to Dashboard
+            </Button>
           </div>
+          
+          {/* EMERGENCY DEBUG SECTION */}
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="text-xs text-red-800 space-y-1">
+              <div><strong>DEBUG:</strong> Current Step = {currentStep}</div>
+              <div className="flex gap-2 justify-center">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(4)}
+                  className="text-xs"
+                >
+                  Jump to Step 4
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleSubmit}
+                  className="text-xs bg-green-100"
+                >
+                  Force Complete
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={onSkip}
+                  className="text-xs bg-blue-100"
+                >
+                  Emergency Skip
+                </Button>
+              </div>
+            </div>
+          </div>
+          
           <p className="text-foreground-muted">
             Let's personalize your automation experience by learning about your company
           </p>
@@ -447,13 +550,18 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
             </div>
           )}
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-3 pt-6 border-t border-border/20">
+          {/* Navigation Buttons - ALWAYS VISIBLE */}
+          <div className="flex gap-3 pt-6 border-t border-border/20 min-h-[80px] items-center"
+               style={{ 
+                 borderRadius: '0 0 var(--radius) var(--radius)',
+               }}>
+            
+            {/* Left Button */}
             {currentStep === 1 ? (
               <Button
                 variant="outline"
                 onClick={onSkip}
-                className="flex-1"
+                className="flex-1 min-h-[48px] text-sm font-medium"
                 disabled={loading}
               >
                 Skip for now
@@ -463,48 +571,68 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={loading}
-                className="flex-1"
+                className="flex-1 min-h-[48px] text-sm font-medium"
               >
-                Previous
+                ← Previous
               </Button>
             )}
 
+            {/* Right Button(s) */}
             {currentStep < 4 ? (
               <Button
                 onClick={handleNext}
-                disabled={
-                  (currentStep === 1 && !canProceedStep1) ||
-                  (currentStep === 2 && !canProceedStep2) ||
-                  (currentStep === 3 && !canProceedStep3) ||
-                  loading
-                }
-                className="flex-1 bg-primary hover:bg-primary-dark"
+                disabled={loading || (currentStep === 1 && !canProceedStep1) || (currentStep === 2 && !canProceedStep2)}
+                className="flex-1 bg-primary hover:bg-primary-dark min-h-[48px] text-sm font-medium"
+                title={`Step ${currentStep}: Continue to step ${currentStep + 1}`}
               >
-                Next
+                {currentStep === 3 ? 'Continue to Final Step' : 'Next'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex-1 bg-primary hover:bg-primary-dark"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    Complete Setup
-                    <CheckCircle className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
+              /* STEP 4 BUTTONS - ALWAYS SHOW */
+              <>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex-1 bg-green-600 hover:bg-green-700 min-h-[48px] text-sm font-medium text-white shadow-lg"
+                  title="Save your company profile and continue to dashboard"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving Profile...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Complete Setup
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  onClick={handleEmergencySkip}
+                  variant="outline"
+                  disabled={loading}
+                  className="px-6 min-h-[48px] text-sm font-medium border-2"
+                  title="Skip saving and go directly to dashboard"
+                >
+                  Skip →
+                </Button>
+              </>
             )}
+            
           </div>
+          
+          {/* Debug Info for Step 4 */}
+          {currentStep === 4 && (
+            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+              <strong>Debug:</strong> Step {currentStep} - Complete Setup button should be visible above
+            </div>
+          )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
