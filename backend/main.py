@@ -45,7 +45,8 @@ app.add_middleware(
         "http://127.0.0.1:8082",
         "http://127.0.0.1:8081",
         "http://127.0.0.1:8080",
-        "http://127.0.0.1:3000"
+        "http://127.0.0.1:3000",
+        "https://opsflow-guardian.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -54,6 +55,7 @@ app.add_middleware(
 
 # Import simplified API endpoints
 from app.api.v1 import endpoints
+from app.api.v1.auth import router as google_auth_router
 
 # Register routes directly
 app.include_router(endpoints.agents.router, prefix="/api/v1/agents", tags=["Agents"])
@@ -62,6 +64,7 @@ app.include_router(endpoints.approvals.router, prefix="/api/v1/approvals", tags=
 app.include_router(endpoints.audit.router, prefix="/api/v1/audit", tags=["Audit"])
 app.include_router(endpoints.analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(endpoints.auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(google_auth_router, tags=["Google Authentication"])
 app.include_router(endpoints.company.router, prefix="/api/v1", tags=["Company Profile"])
 
 
