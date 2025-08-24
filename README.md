@@ -4,7 +4,7 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-336791.svg)](https://www.postgresql.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E.svg)](https://supabase.com/)
 [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org/)
 
 ## ✨ Features
@@ -47,7 +47,7 @@
 ### Tech Stack
 - **Frontend:** React 18 + TypeScript, deployed on Vercel
 - **Backend:** FastAPI + Python, deployed on Railway
-- **Database:** PostgreSQL with Redis caching
+- **Database:** Supabase (PostgreSQL with real-time features)
 - **AI:** Google Gemini 2.5 + Portia AI SDK
 - **Integrations:** 20+ enterprise services
 

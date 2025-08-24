@@ -1,6 +1,6 @@
 """
 OpsFlow Guardian 2.0 - Simplified Main Application Entry Point
-FastAPI-based backend with PostgreSQL database integration
+FastAPI-based backend with Supabase (PostgreSQL) database integration
 """
 
 from fastapi import FastAPI, Request, status
@@ -20,12 +20,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import database initialization
-from app.db.database import init_db, close_db
+from app.db.database import initialize_database, get_database_health
 
 # Create FastAPI application
 app = FastAPI(
     title="OpsFlow Guardian 2.0",
-    description="AI-Powered Enterprise Workflow Automation with Human Oversight & Complete Audit Trails",
+    description="AI-Powered Enterprise Workflow Automation with Supabase Database & Human Oversight",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -83,11 +83,8 @@ async def startup_event():
     
     # Initialize database connection
     try:
-        db_success = await init_db()
-        if db_success:
-            logger.info("✅ Database initialization successful")
-        else:
-            logger.warning("⚠️ Database initialization failed - running in limited mode")
+        initialize_database()
+        logger.info("✅ Database initialization successful")
     except Exception as e:
         logger.error(f"❌ Database startup error: {e}")
 
@@ -96,7 +93,7 @@ async def startup_event():
 async def shutdown_event():
     """Clean up database connections on shutdown"""
     logger.info("🛑 Shutting down OpsFlow Guardian 2.0...")
-    await close_db()
+    logger.info("✅ Shutdown complete")
 
 
 @app.get("/")
@@ -107,13 +104,15 @@ async def root():
         "version": "2.0.0",
         "status": "operational",
         "docs": "/docs",
-        "database": "postgresql",
+        "database": "supabase (postgresql)",
         "features": [
-            "Real PostgreSQL database integration",
+            "Supabase database integration",
             "AI-powered workflow automation",
+            "Google OAuth authentication",
             "Company-specific personalization", 
             "Complete audit trails",
-            "Human approval workflows"
+            "Human approval workflows",
+            "Real-time monitoring"
         ]
     }
 
@@ -122,18 +121,18 @@ async def root():
 async def health_check():
     """Health check endpoint with database status"""
     try:
-        from app.db.database import check_database_exists
-        db_status = check_database_exists()
+        db_health = get_database_health()
         
         return {
-            "status": "healthy" if db_status else "degraded",
+            "status": "healthy" if db_health["status"] == "healthy" else "degraded",
             "version": "2.0.0",
             "services": {
                 "api": "operational",
-                "database": "connected" if db_status else "disconnected",
-                "database_type": "postgresql"
+                "database": db_health["status"],
+                "database_type": db_health["database_type"]
             },
-            "database_url": os.getenv("DATABASE_URL", "").replace("password", "***") if db_status else "not configured"
+            "database_info": db_health.get("database_info", {}),
+            "connection_pool": db_health.get("connection_pool", {})
         }
     except Exception as e:
         logger.error(f"Health check error: {e}")
@@ -148,29 +147,16 @@ async def health_check():
 async def database_status():
     """Detailed database status endpoint"""
     try:
-        from app.db.database import execute_sync_query
-        
-        # Get table count
-        table_result = execute_sync_query("""
-            SELECT COUNT(*) as table_count 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_type = 'BASE TABLE'
-        """)
-        
-        table_count = table_result[0][0] if table_result else 0
-        
-        # Get database version
-        version_result = execute_sync_query("SELECT version()")
-        db_version = version_result[0][0] if version_result else "unknown"
+        db_health = get_database_health()
         
         return {
-            "connected": True,
-            "database_type": "postgresql",
-            "version": db_version,
-            "tables_count": table_count,
-            "connection_url": os.getenv("DATABASE_URL", "").replace("password", "***"),
-            "status": "operational" if table_count > 0 else "setup_required"
+            "connected": db_health["status"] == "healthy",
+            "database_type": db_health["database_type"],
+            "database_info": db_health.get("database_info", {}),
+            "connection_pool": db_health.get("connection_pool", {}),
+            "features": db_health.get("features", {}),
+            "status": db_health["status"],
+            "connection_url": os.getenv("DATABASE_URL", "").replace("password", "***") if "DATABASE_URL" in os.environ else "not configured"
         }
         
     except Exception as e:
@@ -178,9 +164,9 @@ async def database_status():
             "connected": False,
             "error": str(e),
             "setup_instructions": [
-                "1. Ensure PostgreSQL is running",
-                "2. Create database: createdb opsflow_guardian",
-                "3. Run setup script: psql -U opsflow -d opsflow_guardian -f COMPLETE_DATABASE_SETUP.sql"
+                "1. Create Supabase project at supabase.com",
+                "2. Run the supabase_setup.sql script in SQL Editor",
+                "3. Update DATABASE_URL environment variable with Supabase connection string"
             ]
         }
 

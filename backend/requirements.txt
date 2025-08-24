@@ -37,3 +37,4 @@ jira==3.8.0
 stripe==12.2.0
 sendgrid==6.12.1
 twilio==9.7.1
+supabase==2.8.1
