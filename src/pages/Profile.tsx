@@ -27,13 +27,14 @@ import {
 } from 'lucide-react';
 
 interface UserProfile {
-  firstName: string;
-  lastName: string;
+  id?: number;
+  fullName: string;
   email: string;
   organization: string;
   role: string;
   avatar: string;
   joined: string;
+  isActive?: boolean;
 }
 
 interface NotificationSettings {
@@ -59,17 +60,65 @@ export default function Profile() {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
 
   const [profile, setProfile] = useState<UserProfile>({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@company.com',
-    organization: 'TechCorp Inc.',
-    role: 'Workflow Manager',
+    fullName: '',
+    email: '',
+    organization: '',
+    role: 'User',
     avatar: '',
-    joined: 'January 2024'
+    joined: ''
   });
+
+  // Fetch user data from backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          // Redirect to login if no token
+          window.location.href = '/login';
+          return;
+        }
+
+        const response = await fetch('http://localhost:8001/api/v1/auth/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setProfile({
+            id: userData.id,
+            fullName: userData.name || '',
+            email: userData.email || '',
+            organization: 'OpsFlow Guardian', // Default organization
+            role: userData.is_active ? 'Active User' : 'Inactive User',
+            avatar: '',
+            joined: 'Recently', // We could format created_at if available
+            isActive: userData.is_active
+          });
+        } else if (response.status === 401) {
+          // Token is invalid, redirect to login
+          localStorage.removeItem('access_token');
+          window.location.href = '/login';
+        } else {
+          console.error('Failed to fetch user data');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
     workflowUpdates: true,
@@ -96,10 +145,25 @@ export default function Profile() {
     setSuccessMessage('');
 
     try {
-      // Simulate API call
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        alert('Session expired. Please log in again.');
+        window.location.href = '/login';
+        return;
+      }
+
+      // For now, we'll just simulate the update since we don't have a user update endpoint yet
+      // In a real implementation, you would call your backend API here
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
       setSuccessMessage('Profile updated successfully!');
+      console.log('Profile data that would be sent:', {
+        fullName: profile.fullName,
+        email: profile.email,
+        organization: profile.organization,
+      });
     } catch (error) {
+      console.error('Profile update error:', error);
       alert('Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
@@ -154,7 +218,7 @@ export default function Profile() {
   };
 
   const handleBackToDashboard = () => {
-    alert('🏠 Navigating back to dashboard...');
+    window.location.href = '/';
   };
 
   return (
@@ -194,12 +258,12 @@ export default function Profile() {
               <Avatar className="w-20 h-20 border-2 border-primary">
                 <AvatarImage src={profile.avatar} />
                 <AvatarFallback className="bg-gradient-primary text-white text-xl">
-                  {profile.firstName[0]}{profile.lastName[0]}
+                  {profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase() || '??'}
                 </AvatarFallback>
               </Avatar>
               <div className="text-center sm:text-left">
                 <h2 className="text-xl font-semibold">
-                  {profile.firstName} {profile.lastName}
+                  {profile.fullName || 'Loading...'}
                 </h2>
                 <p className="text-foreground-muted">{profile.email}</p>
                 <div className="flex flex-wrap gap-2 mt-2 justify-center sm:justify-start">
@@ -246,73 +310,72 @@ export default function Profile() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleProfileUpdate} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isLoadingData ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin" />
+                    <span className="ml-2">Loading profile...</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleProfileUpdate} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="fullName">Full Name</Label>
                       <Input
-                        id="firstName"
-                        value={profile.firstName}
-                        onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
+                        id="fullName"
+                        value={profile.fullName}
+                        onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
                         className="bg-background-subtle border-border-hover"
+                        placeholder="Enter your full name"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={profile.lastName}
-                        onChange={(e) => setProfile(prev => ({ ...prev, lastName: e.target.value }))}
-                        className="bg-background-subtle border-border-hover"
-                      />
+                      <Label htmlFor="email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
+                        <Input
+                          id="email"
+                          type="email"
+                          value={profile.email}
+                          onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
+                          className="pl-10 bg-background-subtle border-border-hover"
+                          placeholder="Enter your email"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
-                      <Input
-                        id="email"
-                        type="email"
-                        value={profile.email}
-                        onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                        className="pl-10 bg-background-subtle border-border-hover"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="organization">Organization</Label>
+                      <div className="relative">
+                        <Building className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
+                        <Input
+                          id="organization"
+                          value={profile.organization}
+                          onChange={(e) => setProfile(prev => ({ ...prev, organization: e.target.value }))}
+                          className="pl-10 bg-background-subtle border-border-hover"
+                          placeholder="Enter your organization"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="organization">Organization</Label>
-                    <div className="relative">
-                      <Building className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
-                      <Input
-                        id="organization"
-                        value={profile.organization}
-                        onChange={(e) => setProfile(prev => ({ ...prev, organization: e.target.value }))}
-                        className="pl-10 bg-background-subtle border-border-hover"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="glass-button-primary gap-2"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Update Profile
-                      </>
-                    )}
-                  </Button>
-                </form>
+                    <Button
+                      type="submit"
+                      className="glass-button-primary gap-2"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Update Profile
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

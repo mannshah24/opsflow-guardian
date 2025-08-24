@@ -9,7 +9,9 @@ from app.api.v1.endpoints import (
     approvals,
     audit,
     analytics,
-    auth
+    auth,
+    email_config,
+    company
 )
 
 api_router = APIRouter()
@@ -49,4 +51,14 @@ api_router.include_router(
     analytics.router,
     prefix="/analytics",
     tags=["Analytics"]
+)
+
+api_router.include_router(
+    email_config.router,
+    tags=["Email Configuration"]
+)
+
+api_router.include_router(
+    company.router,
+    tags=["Company Profile"]
 )

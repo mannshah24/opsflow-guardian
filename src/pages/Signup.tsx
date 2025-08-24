@@ -12,10 +12,8 @@ import { Mail, Lock, Eye, EyeOff, Chrome, ArrowLeft, User, Building } from 'luci
 export default function Signup() {
   const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    organization: '',
     password: '',
     confirmPassword: '',
   });
@@ -39,6 +37,12 @@ export default function Signup() {
     setError('');
 
     // Validation
+    if (!formData.name || !formData.email || !formData.password) {
+      setError('Name, email, and password are required');
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
@@ -58,33 +62,38 @@ export default function Signup() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
+      const response = await fetch('http://localhost:8001/api/v1/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
+          name: formData.name,
           email: formData.email,
-          organization: formData.organization,
-          password: formData.password,
-          confirm_password: formData.confirmPassword,
-          agreed_to_terms: agreedToTerms
+          password: formData.password
         }),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.access_token) {
-        // Store tokens
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+      if (response.ok && data.id) {
+        // Mark as first-time user for onboarding
+        localStorage.setItem('opsflow-first-time-user', 'true');
+        localStorage.removeItem('opsflow-onboarding-completed'); // Ensure onboarding will show
         
-        alert(`✅ Account created successfully! Welcome ${data.user.first_name} ${data.user.last_name}`);
+        // Store authentication token if provided
+        if (data.access_token) {
+          localStorage.setItem('opsflow_auth_token', data.access_token);
+        } else {
+          // Generate mock token for development
+          const mockToken = 'new-user-token-' + Date.now() + Math.random().toString(36);
+          localStorage.setItem('opsflow_auth_token', mockToken);
+        }
         
-        // In real app, redirect to dashboard
-        window.location.href = '/';
+        alert(`✅ Account created successfully! Welcome ${data.name}! Let's set up your company profile.`);
+        
+        // Redirect to dashboard where onboarding will automatically trigger
+        window.location.href = '/dashboard';
       } else {
         setError(data.detail || 'Registration failed');
       }
@@ -98,24 +107,11 @@ export default function Signup() {
 
   const handleGoogleAuth = async () => {
     try {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:8000/api/v1/auth/oauth/google');
-      const data = await response.json();
-      
-      if (data.access_token) {
-        // Store tokens
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-        
-        alert(`✅ Google OAuth signup successful! Welcome ${data.user.first_name}`);
-        // In real app, redirect to dashboard
-        window.location.href = '/';
-      }
+      // Redirect to Google OAuth endpoint
+      window.location.href = 'http://localhost:8001/api/v1/auth/oauth/google';
     } catch (error) {
       console.error('Google OAuth failed:', error);
       setError('Google authentication failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -178,29 +174,18 @@ export default function Signup() {
 
             {/* Signup Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name Fields */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+              {/* Name Field */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
                   <Input
-                    id="firstName"
-                    name="firstName"
-                    placeholder="John"
-                    value={formData.firstName}
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    value={formData.name}
                     onChange={handleInputChange}
-                    className="bg-background-subtle border-border-hover focus:border-primary"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    placeholder="Doe"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="bg-background-subtle border-border-hover focus:border-primary"
+                    className="pl-10 bg-background-subtle border-border-hover focus:border-primary"
                     required
                   />
                 </div>
@@ -216,22 +201,6 @@ export default function Signup() {
                     type="email"
                     placeholder="john.doe@company.com"
                     value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10 bg-background-subtle border-border-hover focus:border-primary"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="organization">Organization</Label>
-                <div className="relative">
-                  <Building className="absolute left-3 top-3 w-4 h-4 text-foreground-muted" />
-                  <Input
-                    id="organization"
-                    name="organization"
-                    placeholder="Your Company Name"
-                    value={formData.organization}
                     onChange={handleInputChange}
                     className="pl-10 bg-background-subtle border-border-hover focus:border-primary"
                     required
@@ -331,7 +300,7 @@ export default function Signup() {
               Already have an account?{' '}
               <button
                 className="text-primary hover:text-primary-accent transition-colors font-medium"
-                onClick={() => alert('🔗 Redirecting to login...')}
+                onClick={() => window.location.href = '/login'}
               >
                 Sign in
               </button>

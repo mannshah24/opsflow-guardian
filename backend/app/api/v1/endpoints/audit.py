@@ -23,106 +23,14 @@ async def get_audit_logs(
 ):
     """Get audit logs with filtering and pagination"""
     try:
-        # Mock audit log data
-        audit_logs = [
-            {
-                "id": "audit-001",
-                "timestamp": "2025-01-23T10:35:00Z",
-                "event_type": "workflow_execution",
-                "user_id": "system-executor",
-                "workflow_id": "workflow-001", 
-                "action": "step_completed",
-                "details": {
-                    "step_name": "Setup Slack Access",
-                    "duration": "10m",
-                    "tools_used": ["slack"],
-                    "success": True
-                },
-                "risk_level": "low",
-                "ip_address": "10.0.1.15",
-                "user_agent": "OpsFlow-Agent/2.0"
-            },
-            {
-                "id": "audit-002",
-                "timestamp": "2025-01-23T10:30:00Z",
-                "event_type": "approval_granted",
-                "user_id": "manager-001",
-                "workflow_id": "workflow-002",
-                "action": "workflow_approved",
-                "details": {
-                    "approval_id": "approval-001",
-                    "approver_notes": "Vendor verification completed",
-                    "risk_assessment": "medium"
-                },
-                "risk_level": "medium", 
-                "ip_address": "192.168.1.45",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            },
-            {
-                "id": "audit-003",
-                "timestamp": "2025-01-23T10:25:00Z",
-                "event_type": "plan_generation",
-                "user_id": "planner-agent",
-                "workflow_id": "workflow-003",
-                "action": "plan_created",
-                "details": {
-                    "plan_complexity": "medium",
-                    "steps_count": 4,
-                    "integrations": ["google_workspace", "jira"],
-                    "estimated_duration": "30m"
-                },
-                "risk_level": "low",
-                "ip_address": "10.0.1.10",
-                "user_agent": "OpsFlow-Planner/2.0"
-            },
-            {
-                "id": "audit-004", 
-                "timestamp": "2025-01-23T10:20:00Z",
-                "event_type": "security_scan",
-                "user_id": "security-agent",
-                "workflow_id": None,
-                "action": "vulnerability_scan_completed",
-                "details": {
-                    "scan_type": "automated_security_audit",
-                    "vulnerabilities_found": 0,
-                    "compliance_score": 98.5
-                },
-                "risk_level": "info",
-                "ip_address": "10.0.1.20",
-                "user_agent": "OpsFlow-Security/2.0"
-            },
-            {
-                "id": "audit-005",
-                "timestamp": "2025-01-23T10:15:00Z", 
-                "event_type": "user_action",
-                "user_id": "user-001",
-                "workflow_id": "workflow-004",
-                "action": "workflow_requested",
-                "details": {
-                    "request_type": "employee_onboarding",
-                    "priority": "high",
-                    "description": "Onboard new senior developer"
-                },
-                "risk_level": "low",
-                "ip_address": "192.168.1.100",
-                "user_agent": "Mozilla/5.0 (macOS; Intel Mac OS X 10_15_7)"
-            }
-        ]
-        
-        # Apply filters (simplified for demo)
-        filtered_logs = audit_logs
-        if event_type:
-            filtered_logs = [log for log in filtered_logs if log["event_type"] == event_type]
-        if user_id:
-            filtered_logs = [log for log in filtered_logs if log["user_id"] == user_id]
-        
-        # Apply pagination
-        paginated_logs = filtered_logs[offset:offset + limit]
+        # Return empty audit logs for now since no user activity exists yet
+        # TODO: Replace with actual user-specific audit data from database
+        audit_logs = []
         
         return {
             "success": True,
-            "data": paginated_logs,
-            "total": len(filtered_logs),
+            "data": audit_logs,
+            "total": len(audit_logs),
             "limit": limit,
             "offset": offset
         }

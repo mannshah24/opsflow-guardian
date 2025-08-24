@@ -17,54 +17,9 @@ router = APIRouter()
 async def get_pending_approvals():
     """Get all pending approvals"""
     try:
-        # Mock approval data
-        approvals_data = [
-            {
-                "id": "approval-001",
-                "workflow_id": "workflow-002", 
-                "workflow_name": "Vendor Onboarding - Acme Corp",
-                "requested_by": "procurement-lead",
-                "request_type": "workflow_execution",
-                "risk_level": "medium",
-                "description": "Approval needed for vendor onboarding workflow execution",
-                "steps_requiring_approval": [
-                    {
-                        "step_name": "Contract Document Creation",
-                        "risk_level": "medium",
-                        "reason": "Creates legal documents with external vendor"
-                    },
-                    {
-                        "step_name": "Financial System Integration",
-                        "risk_level": "high", 
-                        "reason": "Modifies payment processing configurations"
-                    }
-                ],
-                "estimated_impact": "Medium - affects procurement and finance workflows",
-                "created_at": "2025-01-23T09:15:00Z",
-                "expires_at": "2025-01-24T09:15:00Z",
-                "status": "pending"
-            },
-            {
-                "id": "approval-002",
-                "workflow_id": "workflow-004",
-                "workflow_name": "Mass Email Campaign - Product Launch",
-                "requested_by": "marketing-team",
-                "request_type": "bulk_operation",
-                "risk_level": "medium",
-                "description": "Approval for sending 10,000+ marketing emails",
-                "steps_requiring_approval": [
-                    {
-                        "step_name": "Bulk Email Send",
-                        "risk_level": "medium",
-                        "reason": "High volume email operation"
-                    }
-                ],
-                "estimated_impact": "Medium - high volume external communication",
-                "created_at": "2025-01-23T10:00:00Z",
-                "expires_at": "2025-01-23T18:00:00Z", 
-                "status": "pending"
-            }
-        ]
+        # Return empty approvals for now since no workflows exist that need approval
+        # TODO: Replace with actual user-specific approval data from database
+        approvals_data = []
         
         return {
             "success": True,

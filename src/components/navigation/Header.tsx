@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/popover';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { apiService, type Notification } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
+import UserProfile from '@/components/auth/UserProfile';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -32,6 +34,7 @@ const quickActions = [
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,19 +65,19 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     switch (action) {
       case 'create-workflow':
         // Navigate to workflow creation
-        window.location.href = '/workflows';
+        navigate('/workflows');
         break;
       case 'approve-all':
         // Navigate to approvals page
-        window.location.href = '/approvals';
+        navigate('/approvals');
         break;
       case 'view-agents':
         // Navigate to agents page
-        window.location.href = '/agents';
+        navigate('/agents');
         break;
       case 'system-status':
         // Navigate to analytics page
-        window.location.href = '/analytics';
+        navigate('/analytics');
         break;
       default:
         break;
@@ -93,16 +96,16 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       // Navigate based on notification type
       switch (notification.type) {
         case 'approval':
-          window.location.href = '/approvals';
+          navigate('/approvals');
           break;
         case 'workflow':
-          window.location.href = '/workflows';
+          navigate('/workflows');
           break;
         case 'agent':
-          window.location.href = '/agents';
+          navigate('/agents');
           break;
         default:
-          window.location.href = '/audit';
+          navigate('/audit');
           break;
       }
     }
@@ -113,17 +116,27 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     if (searchQuery.trim()) {
       // Perform global search across the application
       const params = new URLSearchParams({ q: searchQuery.trim() });
-      window.location.href = `/search?${params.toString()}`;
+      navigate(`/search?${params.toString()}`);
     }
   };
 
   const handleAuthAction = (action: 'login' | 'signup') => {
     // Navigate to authentication pages
-    window.location.href = `/${action}`;
+    navigate(`/${action}`);
   };
 
-  // Check if user is authenticated (for demo purposes, we'll assume they're not)
-  const isAuthenticated = false; // This would normally check localStorage/session
+  const handleLogout = () => {
+    // Remove token
+    localStorage.removeItem('access_token');
+    
+    // Redirect to home
+    navigate('/');
+    
+    alert('👋 Successfully logged out!');
+  };
+
+  // Check if user is authenticated
+  const isAuthenticated = !!localStorage.getItem('access_token');
 
   return (
     <header className="h-14 sm:h-16 bg-card border-b border-border px-3 sm:px-6 flex items-center justify-between gap-3">
@@ -280,18 +293,22 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </>
             ) : (
               <>
-                <DropdownMenuItem onClick={() => window.location.href = '/profile'} className="cursor-pointer">
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
                   <UserCircle className="w-4 h-4 mr-2" />
                   Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Logout
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem onClick={() => window.location.href = '/settings'} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.href = '/help'} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate('/help')} className="cursor-pointer">
               <MessageSquare className="w-4 h-4 mr-2" />
               Help & Support
             </DropdownMenuItem>

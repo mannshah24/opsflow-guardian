@@ -1,14 +1,14 @@
 # OpsFlow Guardian 2.0 Backend
 
-AI-powered enterprise workflow automation platform built with FastAPI and Portia SDK.
+AI-powered enterprise workflow automation platform built with FastAPI and PostgreSQL database integration.
 
 ## 🚀 Quick Start
 
-### Option 1: Using the Start Script (Recommended)
+### Option 1: Automatic Setup (Recommended)
 ```bash
 cd backend
-chmod +x start.sh
-./start.sh
+chmod +x quick_start.sh
+./quick_start.sh
 ```
 
 ### Option 2: Docker Compose
@@ -29,27 +29,29 @@ source venv/bin/activate  # Linux/Mac
 # or
 venv\Scripts\activate  # Windows
 
-# Upgrade pip
-pip install --upgrade pip
-
-# Install all required packages
-pip install fastapi uvicorn websockets redis pydantic python-multipart
-pip install aiofiles python-jose[cryptography] passlib[bcrypt] python-ulid
-pip install requests aiohttp portia-sdk celery sqlalchemy alembic
-pip install pytest pytest-asyncio httpx
-
-# Alternatively, if requirements.txt exists
+# Install dependencies
 pip install -r requirements.txt
 
-# Set up environment
-cp .env.example .env
-# Edit .env with your configuration
+# Setup PostgreSQL Database
+# Ubuntu/Debian: sudo apt install postgresql postgresql-contrib
+# macOS: brew install postgresql
+# Or using Docker: docker run --name postgres-opsflow -e POSTGRES_PASSWORD=password -d -p 5432:5432 postgres
+
+# Create database user and database
+sudo -u postgres psql
+CREATE USER opsflow WITH PASSWORD 'password';
+ALTER USER opsflow CREATEDB;
+CREATE DATABASE opsflow_guardian OWNER opsflow;
+\q
+
+# Initialize database with schema
+python setup_database.py
 
 # Start the server
 python main.py
 ```
 
-**Note**: The virtual environment (`venv/`) is excluded from Git to keep the repository clean. Follow these setup instructions to recreate the development environment on any machine.
+**Note**: The system now uses PostgreSQL for production-ready data persistence with complete audit trails.
 
 ## 📁 Project Structure
 
@@ -110,14 +112,26 @@ Copy `.env.example` to `.env` and configure:
 
 ### Database Setup
 
-**SQLite (Default - Development):**
+**PostgreSQL (Production Ready):**
 ```
-DATABASE_URL=sqlite:///./opsflow.db
+DATABASE_URL=postgresql://opsflow:password@localhost:5432/opsflow_guardian
 ```
 
-**PostgreSQL (Production):**
+The system includes a complete PostgreSQL schema with:
+- 10 production tables (users, organizations, agents, workflows, etc.)
+- Audit logging with triggers
+- Analytics views and indexes
+- Sample data for testing
+- Database health monitoring
+
+**Initialize Database:**
+```bash
+python setup_database.py
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/opsflow_guardian
+
+**Test Database Connection:**
+```bash
+python setup_database.py test
 ```
 
 ## 🤖 Multi-Agent System

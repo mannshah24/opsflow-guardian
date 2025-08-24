@@ -41,10 +41,10 @@ const Analytics = () => {
   }
 
   const stats = analyticsData ? [
-    { icon: BarChart3, label: 'Total Workflows', value: analyticsData.totalWorkflows.toLocaleString(), color: 'primary' },
-    { icon: TrendingUp, label: 'Success Rate', value: `${analyticsData.successRate.toFixed(1)}%`, color: 'success' },
-    { icon: Activity, label: 'Avg Execution', value: analyticsData.avgExecutionTime, color: 'info' },
-    { icon: Clock, label: 'Time Saved', value: analyticsData.timeSaved, color: 'secondary' }
+    { icon: BarChart3, label: 'Total Workflows', value: (analyticsData.totalWorkflows || 0).toLocaleString(), color: 'primary' },
+    { icon: TrendingUp, label: 'Success Rate', value: `${(analyticsData.successRate || 0).toFixed(1)}%`, color: 'success' },
+    { icon: Activity, label: 'Avg Execution', value: analyticsData.avgExecutionTime || '0m', color: 'info' },
+    { icon: Clock, label: 'Time Saved', value: analyticsData.timeSaved || '0h', color: 'secondary' }
   ] : [];
 
   return (

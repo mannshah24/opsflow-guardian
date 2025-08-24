@@ -31,30 +31,35 @@ export default function Login() {
     setIsLoading(true);
     setError('');
 
+    // Validate input
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const response = await fetch('http://localhost:8001/api/v1/auth/login-json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password,
-          remember_me: false
+          password: formData.password
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        // Store tokens
+        // Store token
         localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
         
-        alert(`✅ Login successful! Welcome ${data.user.first_name} ${data.user.last_name}`);
+        alert(`✅ Login successful! Welcome back!`);
         
-        // In real app, redirect to dashboard
-        window.location.href = '/';
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       } else {
         setError(data.detail || 'Login failed');
       }
@@ -68,23 +73,11 @@ export default function Login() {
 
   const handleGoogleAuth = async () => {
     try {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:8000/api/v1/auth/oauth/google');
-      const data = await response.json();
-      
-      if (data.access_token) {
-        // Store tokens
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-        
-        alert(`✅ Google OAuth successful! Welcome ${data.user.first_name}`);
-        // In real app, redirect to dashboard
-      }
+      // Redirect to Google OAuth endpoint
+      window.location.href = 'http://localhost:8001/api/v1/auth/oauth/google';
     } catch (error) {
       console.error('Google OAuth failed:', error);
       setError('Google authentication failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -216,7 +209,7 @@ export default function Login() {
               Don't have an account?{' '}
               <button
                 className="text-primary hover:text-primary-accent transition-colors font-medium"
-                onClick={() => alert('🔗 Redirecting to signup...')}
+                onClick={() => window.location.href = '/signup'}
               >
                 Sign up
               </button>

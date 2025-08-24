@@ -65,7 +65,16 @@ class Settings(BaseSettings):
     JIRA_API_TOKEN: Optional[str] = None
     JIRA_USER_EMAIL: Optional[str] = None
     
-    # Email Configuration
+    # Email Configuration (defaults - users configure their own)
+    EMAIL_HOST: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 587
+    EMAIL_USE_TLS: bool = True
+    EMAIL_FROM_NAME: str = "OpsFlow Guardian 2.0"
+    
+    # User data encryption
+    ENCRYPTION_KEY: Optional[str] = None
+    
+    # Legacy SMTP settings (deprecated - use Gmail settings above)
     SMTP_SERVER: str = "localhost"
     SMTP_PORT: int = 587
     SMTP_USERNAME: Optional[str] = None

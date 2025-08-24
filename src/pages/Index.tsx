@@ -4,9 +4,12 @@ import { AgentMonitor } from '@/components/agents/AgentMonitor';
 import { WorkflowInterface } from '@/components/workflow/WorkflowInterface';
 import { ApprovalCenter } from '@/components/approval/ApprovalCenter';
 import { AuditTrail } from '@/components/audit/AuditTrail';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { apiService } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     activeAgents: 0,
     runningWorkflows: 0,
@@ -52,6 +55,31 @@ const Index = () => {
               <p className="text-lg sm:text-xl foreground-muted mb-6 sm:mb-8 px-2">
                 AI-Powered Workflow Automation with Human Oversight & Complete Audit Trails
               </p>
+              
+              {/* Getting Started Message */}
+              {stats.activeAgents === 0 && stats.runningWorkflows === 0 && stats.pendingApprovals === 0 && (
+                <div className="glass-card p-6 rounded-lg mb-6 sm:mb-8 border border-primary/20">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-primary mb-3">Welcome to Your Dashboard! 🎉</h2>
+                  <p className="text-foreground-muted mb-4">
+                    You're all set up! Start by creating your first workflow or exploring the platform features.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button 
+                      onClick={() => navigate('/workflows')}
+                      className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Create Your First Workflow
+                    </button>
+                    <button 
+                      onClick={() => navigate('/agents')}
+                      className="bg-secondary hover:bg-secondary-dark text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Explore AI Agents
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
                 <div className="glass-card p-4 rounded-lg">
                   <div className="text-2xl sm:text-3xl font-bold text-secondary mb-2">{stats.activeAgents}</div>
@@ -79,12 +107,16 @@ const Index = () => {
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6 sm:gap-8">
           {/* Workflow Interface */}
           <section className="animate-fade-in">
-            <WorkflowInterface />
+            <ErrorBoundary>
+              <WorkflowInterface />
+            </ErrorBoundary>
           </section>
 
           {/* Approval Center */}
           <section className="animate-fade-in">
-            <ApprovalCenter />
+            <ErrorBoundary>
+              <ApprovalCenter />
+            </ErrorBoundary>
           </section>
         </div>
 

@@ -1,162 +1,238 @@
-# 🤖 OpsFlow Guardian 2.0 - AI-Powered Workflow Automation
+# �� OpsFlow Guardian 2.0
 
-**Powered by Google Gemini 2.5 Pro** | Multi-Agent Orchestration | Real-Time Monitoring | Enterprise Security
+**AI-Powered Enterprise Workflow Automation with Human Oversight & Complete Audit Trails**
 
-> **✨ Now featuring Google Gemini 2.5 Pro for cost-effective, high-performance AI automation!**
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-336791.svg)](https://www.postgresql.org/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org/)
 
-OpsFlow Guardian is an AI-powered workflow automation platform that combines multi-agent AI capabilities with human oversight and complete audit trails. Built to solve the enterprise automation trust gap with transparency, steerability, and authenticated operations.
+## ✨ Features
 
-## 🚀 Why Gemini 2.5 Pro?
+### 🤖 **AI-Powered Automation**
+- **Multi-Agent System**: Specialized AI agents for planning, execution, and auditing
+- **Industry-Specific Personalization**: Tailored workflows based on company industry and size
+- **Intelligent Decision Making**: Context-aware automation with confidence scoring
+- **Continuous Learning**: Agents improve performance based on execution history
 
-- **💰 Cost Effective**: ~90% cheaper than OpenAI ($0.00025 vs $0.03 per 1K tokens)
-- **🧠 Advanced Reasoning**: Latest Google AI with superior planning capabilities  
-- **📚 2M Token Context**: Handle complex workflows with massive context windows
-- **⚡ High Performance**: Fast response times with reliable availability
-- **🔒 Enterprise Ready**: Google-grade security and privacy standards
+### 🔒 **Enterprise Security & Compliance**
+- **Complete Audit Trails**: Every action tracked with timestamps and user context
+- **Role-Based Access Control**: Fine-grained permissions for users and organizations
+- **Human Approval Workflows**: Critical actions require explicit human oversight
+- **Data Encryption**: Sensitive data encrypted at rest and in transit
 
-## Project Overview
+### 🏢 **Multi-Tenant Architecture**
+- **Organization Management**: Support for multiple companies with isolated data
+- **User Management**: Flexible user roles and permissions per organization
+- **Company Profiling**: Industry-specific settings and automation preferences
+- **Scalable Infrastructure**: Designed for enterprise-level deployment
 
-**Repository**: https://github.com/Kartikvyas1604/opsflow-guardian
+### 🔧 **Workflow Management**
+- **Visual Workflow Builder**: Drag-and-drop interface for creating complex workflows
+- **Template Library**: Pre-built workflows for common business processes
+- **Real-Time Monitoring**: Live status updates and performance metrics
+- **Error Handling**: Automatic retry logic and failure notifications
 
-## Development Setup
+### 📊 **Analytics & Insights**
+- **Performance Dashboards**: Real-time metrics for workflows and agents
+- **Success Rate Tracking**: Monitor automation effectiveness over time
+- **Cost Analysis**: Track resource usage and optimization opportunities
+- **Compliance Reporting**: Generate reports for regulatory requirements
 
-**Local Development**
+## 🏗️ Architecture
 
-To run this project locally, you'll need Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API   │    │   Database      │
+│   (React/Vite)  │◄──►│   (FastAPI)     │◄──►│  (PostgreSQL)   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                    ┌─────────┼─────────┐
+                    │         │         │
+            ┌───────▼───┐ ┌───▼────┐ ┌──▼─────┐
+            │ Planner   │ │Executor│ │Auditor │
+            │ Agent     │ │ Agent  │ │ Agent  │
+            └───────────┘ └────────┘ └────────┘
+```
 
-Follow these steps:
+## 🚀 Quick Start
 
-```sh
-# Step 1: Clone the repository
+### Prerequisites
+- **Python 3.8+**
+- **Node.js 18+**
+- **PostgreSQL 13+**
+- **Git**
+
+### 1. Clone Repository
+\`\`\`bash
 git clone https://github.com/Kartikvyas1604/opsflow-guardian.git
-
-# Step 2: Navigate to the project directory
 cd opsflow-guardian
+\`\`\`
 
-# Step 3: Install the necessary dependencies
-npm i
-
-# Step 4: Start the development server
-npm run dev
-```
-
-**Backend Setup (with Gemini 2.5 Pro)**
-
-```sh
-# Step 1: Navigate to backend directory
+### 2. Backend Setup
+\`\`\`bash
 cd backend
 
-# Step 2: Create virtual environment
+# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\\Scripts\\activate
 
-# Step 3: Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Step 4: Set up environment variables
-cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY
+# Setup database
+./setup_new_database.sh
 
-# Step 5: Test Gemini integration
-python test_gemini.py
-
-# Step 6: Start the backend
+# Start backend server
 python main.py
-```
+\`\`\`
 
-**Getting Your Gemini API Key:**
+### 3. Frontend Setup
+\`\`\`bash
+cd ../  # Back to root directory
 
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Click "Create API Key"
-3. Copy the key and add it to your `.env` file as `GOOGLE_API_KEY`
-4. The API includes a generous free tier - perfect for development!
+# Install dependencies
+npm install
 
-The project also includes a Python FastAPI backend. To run the backend:
+# Start development server
+npm run dev
+\`\`\`
 
-```sh
-# Navigate to backend directory
+### 4. Access Application
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8001
+- **API Documentation**: http://localhost:8001/docs
+
+## 📚 Documentation
+
+- **[Database Schema](docs/DATABASE_SCHEMA.md)** - Complete database structure and relationships
+- **[Company Onboarding](docs/COMPANY_ONBOARDING_FLOW.md)** - Multi-tenant setup process
+- **[Workflow Testing](docs/WORKFLOW_RUN_PAUSE_TEST.md)** - Testing procedures and examples
+- **[API Reference](http://localhost:8001/docs)** - Interactive API documentation
+
+## 🛠️ Development
+
+### Project Structure
+\`\`\`
+opsflow-guardian/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── api/            # API endpoints
+│   │   ├── db/             # Database models and connections
+│   │   ├── models/         # Pydantic models
+│   │   └── services/       # Business logic
+│   ├── main.py             # Application entry point
+│   └── requirements.txt    # Python dependencies
+├── src/                    # React frontend
+│   ├── components/         # Reusable UI components
+│   ├── pages/             # Application pages
+│   ├── hooks/             # Custom React hooks
+│   └── lib/               # Utility functions
+├── docs/                  # Documentation
+├── public/                # Static assets
+└── package.json           # Node.js dependencies
+\`\`\`
+
+### Environment Configuration
+Create \`.env\` files:
+
+**Backend** (\`backend/.env\`):
+\`\`\`env
+DATABASE_URL=postgresql://opsflow:12345@localhost:5432/opsflow_guardian
+SECRET_KEY=your-secret-key
+GOOGLE_API_KEY=your-google-api-key
+\`\`\`
+
+**Frontend** (\`.env\`):
+\`\`\`env
+VITE_API_BASE_URL=http://localhost:8001
+\`\`\`
+
+### Database Management
+\`\`\`bash
+# View database with GUI browser
 cd backend
+python3 database_browser.py
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Connect via command line
+PGPASSWORD=12345 psql -h localhost -U opsflow -d opsflow_guardian
 
-# Start the backend server
-python main.py
-```
+# Reset database
+./setup_new_database.sh
+\`\`\`
 
-**Using Docker**
+## 🔧 API Endpoints
 
-You can also run the entire application using Docker:
+### Authentication
+- \`POST /api/v1/auth/login\` - User login
+- \`POST /api/v1/auth/register\` - User registration
+- \`POST /api/v1/auth/refresh\` - Token refresh
 
-```sh
-# From the project root
-docker-compose up
-```
+### Workflows
+- \`GET /api/v1/workflows\` - List workflows
+- \`POST /api/v1/workflows\` - Create workflow
+- \`POST /api/v1/workflows/{id}/execute\` - Execute workflow
+- \`GET /api/v1/workflows/{id}/status\` - Get execution status
 
-## Technology Stack
+### Approvals
+- \`GET /api/v1/approvals\` - List pending approvals
+- \`POST /api/v1/approvals/{id}/approve\` - Approve request
+- \`POST /api/v1/approvals/{id}/reject\` - Reject request
 
-This project is built with:
+### Analytics
+- \`GET /api/v1/analytics/dashboard\` - Dashboard metrics
+- \`GET /api/v1/analytics/performance\` - Performance data
 
-**Frontend:**
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🐳 Docker Deployment
 
-**Backend:**
-- Python
-- FastAPI
-- SQLAlchemy
-- Redis
-- WebSockets
+\`\`\`bash
+# Backend with Docker Compose
+cd backend
+docker-compose up -d
 
-**AI/ML:**
-- Portia AI integration
-- Multi-agent workflow orchestration
-- Natural language processing
+# Full stack deployment
+docker-compose -f docker-compose.prod.yml up -d
+\`\`\`
 
-## Features
+## 🧪 Testing
 
-- **Multi-Agent AI Orchestration**: Coordinate multiple AI agents for complex workflows
-- **Human-in-the-Loop**: Built-in approval mechanisms for critical decisions
-- **Complete Audit Trail**: Every action tracked and logged for compliance
-- **Real-time Monitoring**: Live dashboard for workflow execution status
-- **Integration Ready**: Connect with existing enterprise systems
-- **Secure & Scalable**: Enterprise-grade security and performance
+\`\`\`bash
+# Backend tests
+cd backend
+python -m pytest
 
-## Deployment
+# Frontend tests
+npm test
 
-The application can be deployed using various methods:
+# End-to-end tests
+npm run test:e2e
+\`\`\`
 
-1. **Docker Deployment**: Use the provided Dockerfile and docker-compose.yml
-2. **Cloud Platforms**: Deploy to AWS, Google Cloud, or Azure
-3. **Local Server**: Run on your own infrastructure
-
-For production deployment, make sure to:
-- Set up proper environment variables
-- Configure SSL certificates
-- Set up monitoring and logging
-- Configure backup strategies
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (\`git checkout -b feature/amazing-feature\`)
+3. Commit changes (\`git commit -m 'Add amazing feature'\`)
+4. Push to branch (\`git push origin feature/amazing-feature\`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 🙏 Acknowledgments
 
-For questions or support, please contact:
-- Email: kartik.vyas@example.com
-- GitHub: [@Kartikvyas1604](https://github.com/Kartikvyas1604)
+- **FastAPI** - Modern, fast web framework for building APIs
+- **React** - A JavaScript library for building user interfaces
+- **PostgreSQL** - Advanced open source relational database
+- **Tailwind CSS** - A utility-first CSS framework
+
+## 📞 Support
+
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/Kartikvyas1604/opsflow-guardian/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Kartikvyas1604/opsflow-guardian/discussions)
 
 ---
 
-Built with ❤️ by Kartik Vyas
+**Built with ❤️ for Enterprise Workflow Automation**

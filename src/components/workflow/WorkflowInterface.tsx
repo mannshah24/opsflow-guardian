@@ -53,6 +53,49 @@ export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  const handleToggleWorkflow = async (workflowId: string, currentStatus: string) => {
+    try {
+      // Show loading state
+      const actionType = currentStatus === 'running' ? 'pausing' : 'starting';
+      toast({
+        title: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} workflow...`,
+        description: "Please wait while we update the workflow status.",
+      });
+      
+      // Call the API to toggle workflow status
+      const success = await apiService.toggleWorkflowStatus(workflowId, currentStatus);
+      
+      if (success) {
+        if (currentStatus === 'running') {
+          // Workflow paused
+          toast({
+            title: "Workflow paused",
+            description: "The workflow has been paused successfully.",
+          });
+        } else {
+          // Workflow started/resumed
+          toast({
+            title: "Workflow started",
+            description: "The workflow has been started and is now running.",
+          });
+        }
+        
+        // Refresh workflows data
+        const workflowsData = await apiService.getWorkflows();
+        setWorkflows(workflowsData.filter(w => w.status === 'running' || w.status === 'pending'));
+      } else {
+        throw new Error('Failed to toggle workflow status');
+      }
+    } catch (error) {
+      console.error('Failed to toggle workflow:', error);
+      toast({
+        title: "Action failed",
+        description: "Failed to update workflow status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleCreateWorkflow = async () => {
     if (!newWorkflowDescription.trim()) {
       toast({
@@ -167,26 +210,37 @@ export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({
                   </div>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <Button variant="ghost" size="sm" className="glass-button p-2 h-auto">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn(
+                      "glass-button p-2 h-auto transition-all",
+                      workflow.status === 'running' ? 
+                        "hover:bg-warning/20 hover:text-warning" : 
+                        "hover:bg-primary/20 hover:text-primary"
+                    )}
+                    onClick={() => handleToggleWorkflow(workflow.id, workflow.status)}
+                    title={workflow.status === 'running' ? 'Pause workflow' : 'Start workflow'}
+                  >
                     {workflow.status === 'running' ? 
-                      <Pause className="w-4 h-4" /> : 
-                      <Play className="w-4 h-4" />
+                      <Pause className="w-4 h-4 text-warning" /> : 
+                      <Play className="w-4 h-4 text-primary" />
                     }
                   </Button>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              {workflow.status === 'running' && (
+              {workflow.status === 'running' && workflow.steps && workflow.steps.length > 0 && (
                 <div className="mb-4">
                   <div className="flex justify-between text-xs text-foreground-muted mb-1">
                     <span>Progress</span>
-                    <span>{Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) || 0}%</span>
+                    <span>{workflow.steps && workflow.steps.length > 0 ? Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) : 0}%</span>
                   </div>
                   <div className="w-full bg-background-subtle rounded-full h-2">
                     <div 
                       className="bg-gradient-primary h-2 rounded-full transition-all duration-300 animate-shimmer"
-                      style={{ width: `${Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) || 0}%` }}
+                      style={{ width: `${workflow.steps && workflow.steps.length > 0 ? Math.round(workflow.steps.filter(step => step.status === 'completed').length / workflow.steps.length * 100) : 0}%` }}
                     ></div>
                   </div>
                 </div>
@@ -194,7 +248,7 @@ export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({
 
               {/* Steps */}
               <div className="space-y-2 mb-4">
-                {workflow.steps.slice(0, 3).map((step, index) => (
+                {workflow.steps && workflow.steps.length > 0 && workflow.steps.slice(0, 3).map((step, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <div className="flex-shrink-0">
                       {step.status === 'completed' && (
@@ -216,7 +270,7 @@ export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({
                     </span>
                   </div>
                 ))}
-                {workflow.steps.length > 3 && (
+                {workflow.steps && workflow.steps.length > 3 && (
                   <div className="text-xs text-foreground-muted ml-6">
                     +{workflow.steps.length - 3} more steps
                   </div>
@@ -225,7 +279,7 @@ export const WorkflowInterface: React.FC<WorkflowInterfaceProps> = ({
 
               {/* Tools */}
               <div className="flex flex-wrap gap-1">
-                {workflow.integrations_used.map((integration) => (
+                {(workflow.integrations_used || []).map((integration) => (
                   <Badge key={integration} variant="outline" className="text-xs">
                     {integration}
                   </Badge>

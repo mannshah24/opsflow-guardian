@@ -16,68 +16,51 @@ router = APIRouter()
 async def get_dashboard_analytics():
     """Get dashboard analytics data"""
     try:
-        # Mock dashboard analytics
+        # Return empty analytics data for now since no user workflows exist yet
+        # TODO: Replace with actual user-specific analytics data from database
         analytics_data = {
             "overview": {
-                "active_workflows": 12,
-                "completed_today": 8,
-                "pending_approvals": 2,
-                "success_rate": 96.8,
-                "average_execution_time": "18.5 minutes"
+                "active_workflows": 0,
+                "completed_today": 0,
+                "pending_approvals": 0,
+                "success_rate": 0,
+                "average_execution_time": "0 minutes"
             },
             "workflow_metrics": {
-                "total_workflows": 1247,
-                "successful": 1206,
-                "failed": 23,
-                "cancelled": 18,
-                "success_rate_trend": [
-                    {"date": "2025-01-17", "rate": 94.2},
-                    {"date": "2025-01-18", "rate": 95.8},
-                    {"date": "2025-01-19", "rate": 97.1},
-                    {"date": "2025-01-20", "rate": 96.5},
-                    {"date": "2025-01-21", "rate": 98.2},
-                    {"date": "2025-01-22", "rate": 97.9},
-                    {"date": "2025-01-23", "rate": 96.8}
-                ]
+                "total_workflows": 0,
+                "successful": 0,
+                "failed": 0,
+                "cancelled": 0,
+                "success_rate_trend": []
             },
             "agent_performance": {
                 "planner": {
-                    "utilization": 78.5,
-                    "success_rate": 98.7,
-                    "avg_response_time": "2.3s"
+                    "utilization": 0,
+                    "success_rate": 0,
+                    "avg_response_time": "0s"
                 },
                 "executor": {
-                    "utilization": 85.2,
-                    "success_rate": 96.8, 
-                    "avg_response_time": "4.1s"
+                    "utilization": 0,
+                    "success_rate": 0, 
+                    "avg_response_time": "0s"
                 },
                 "auditor": {
-                    "utilization": 45.7,
-                    "success_rate": 99.9,
-                    "avg_response_time": "1.8s"
+                    "utilization": 0,
+                    "success_rate": 0,
+                    "avg_response_time": "0s"
                 }
             },
-            "integration_usage": {
-                "google_workspace": 234,
-                "slack": 189,
-                "jira": 156,
-                "notion": 98,
-                "email": 167
-            },
+            "integration_usage": {},
             "risk_distribution": {
-                "low": 78.2,
-                "medium": 18.4,
-                "high": 2.8,
-                "critical": 0.6
+                "low": 0,
+                "medium": 0,
+                "high": 0,
+                "critical": 0
             },
             "cost_metrics": {
-                "total_cost_today": 45.67,
-                "cost_per_workflow": 3.82,
-                "monthly_trend": [
-                    {"month": "2024-11", "cost": 987.23},
-                    {"month": "2024-12", "cost": 1203.45},
-                    {"month": "2025-01", "cost": 1456.78}
-                ]
+                "total_cost_today": 0,
+                "cost_per_workflow": 0,
+                "monthly_trend": []
             }
         }
         

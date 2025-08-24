@@ -12,12 +12,19 @@ import {
   CheckCircle,
   Clock,
   Plus,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { apiService, type Agent } from '@/services/api';
 
@@ -73,6 +80,79 @@ const Agents = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [deployLoading, setDeployLoading] = useState(false);
+  const [showDeployDialog, setShowDeployDialog] = useState(false);
+  const [newAgent, setNewAgent] = useState({
+    name: '',
+    description: '',
+    type: 'automation'
+  });
+  
+  const { toast } = useToast();
+
+  const handleDeployAgent = async () => {
+    if (!newAgent.name.trim() || !newAgent.description.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDeployLoading(true);
+    try {
+      const deployedAgent = await apiService.deployAgent({
+        name: newAgent.name,
+        description: newAgent.description,
+        type: newAgent.type
+      });
+
+      if (deployedAgent) {
+        toast({
+          title: "Agent Deployed Successfully!",
+          description: `${newAgent.name} has been deployed and is now active`,
+        });
+        
+        // Reset form and close dialog
+        setNewAgent({ name: '', description: '', type: 'automation' });
+        setShowDeployDialog(false);
+        
+        // Refresh agents data
+        const agentsData = await apiService.getAgents();
+        setAgents(agentsData);
+        
+        // Select the newly deployed agent if it's the first one
+        if (agentsData.length === 1) {
+          setSelectedAgent(agentsData[0]);
+        }
+      }
+    } catch (error: any) {
+      console.error('Failed to deploy agent:', error);
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes('Authentication required')) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to create agents. Redirecting to login page...",
+          variant: "destructive",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+        return;
+      }
+      
+      toast({
+        title: "Deployment Failed",
+        description: "Failed to deploy agent. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeployLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,10 +197,89 @@ const Agents = () => {
               Real-time monitoring of intelligent workflow agents
             </p>
           </div>
-          <Button className="glass-button shrink-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Deploy Agent
-          </Button>
+          <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+            <DialogTrigger asChild>
+              <Button className="glass-button shrink-0">
+                <Plus className="w-4 h-4 mr-2" />
+                Deploy Agent
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="glass-card border-0">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Bot className="w-5 h-5 text-primary" />
+                  Deploy New Agent
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Agent Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Data Processing Agent"
+                    value={newAgent.name}
+                    onChange={(e) => setNewAgent(prev => ({ ...prev, name: e.target.value }))}
+                    className="glass-input"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="type">Agent Type</Label>
+                  <Select value={newAgent.type} onValueChange={(value) => setNewAgent(prev => ({ ...prev, type: value }))}>
+                    <SelectTrigger className="glass-input">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="automation">Automation Agent</SelectItem>
+                      <SelectItem value="planner">Planning Agent</SelectItem>
+                      <SelectItem value="executor">Execution Agent</SelectItem>
+                      <SelectItem value="auditor">Audit Agent</SelectItem>
+                      <SelectItem value="monitoring">Monitoring Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe what this agent will do..."
+                    value={newAgent.description}
+                    onChange={(e) => setNewAgent(prev => ({ ...prev, description: e.target.value }))}
+                    className="glass-input min-h-[100px]"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={() => setShowDeployDialog(false)}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={deployLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDeployAgent}
+                    className="flex-1 bg-primary hover:bg-primary-dark"
+                    disabled={deployLoading}
+                  >
+                    {deployLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Deploying...
+                      </>
+                    ) : (
+                      <>
+                        <Bot className="w-4 h-4 mr-2" />
+                        Deploy Agent
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Agent Statistics Cards */}

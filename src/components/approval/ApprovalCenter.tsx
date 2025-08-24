@@ -140,9 +140,9 @@ export const ApprovalCenter = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
-                  <Badge className={cn(getRiskColor(approval.risk_assessment.level), "border-0 text-xs")}>
-                    {approval.risk_assessment.level === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
-                    {approval.risk_assessment.level} risk
+                  <Badge className={cn(getRiskColor(approval.risk_assessment?.level || 'medium'), "border-0 text-xs")}>
+                    {approval.risk_assessment?.level === 'high' && <AlertTriangle className="w-3 h-3 mr-1" />}
+                    {approval.risk_assessment?.level || 'unknown'} risk
                   </Badge>
                   <Badge variant={approval.priority === 'urgent' ? 'destructive' : 'outline'} className="text-xs">
                     {approval.priority} priority

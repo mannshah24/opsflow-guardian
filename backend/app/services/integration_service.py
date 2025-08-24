@@ -7,6 +7,7 @@ import logging
 from typing import Dict, List, Any, Optional
 import httpx
 from app.core.config import settings
+from app.services.gmail_service import gmail_service
 
 logger = logging.getLogger(__name__)
 
@@ -71,12 +72,18 @@ class IntegrationService:
                 "status": "available"
             }
         
-        # Email
-        if settings.SENDGRID_API_KEY:
+        # Email (Gmail SMTP)
+        if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
             self.integrations["email"] = {
-                "name": "Email Service",
-                "tools": ["send", "templates"],
+                "name": "Gmail Email Service",
+                "tools": ["send", "notifications", "approvals"],
                 "status": "available"
+            }
+        elif settings.EMAIL_HOST_USER:  # Partial configuration
+            self.integrations["email"] = {
+                "name": "Email Service (Needs Password)",
+                "tools": ["send", "notifications"],
+                "status": "partial"
             }
         
         logger.info(f"Initialized {len(self.integrations)} integrations")
@@ -102,6 +109,8 @@ class IntegrationService:
                 return await self._test_slack_connection()
             elif integration_name == "google_workspace" and settings.GOOGLE_CLIENT_ID:
                 return await self._test_google_connection()
+            elif integration_name == "email":
+                return await self._test_gmail_connection()
             # Add more integration tests
             
             return True
@@ -128,3 +137,13 @@ class IntegrationService:
         # This would require proper OAuth flow implementation
         # For now, just return True if credentials are configured
         return bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)
+    
+    async def _test_gmail_connection(self) -> bool:
+        """Test Gmail SMTP connection."""
+        try:
+            from .gmail_service import GmailSMTPService
+            gmail_service = GmailSMTPService()
+            return await gmail_service.test_connection()
+        except Exception as e:
+            logger.error(f"Gmail connection test failed: {e}")
+            return False

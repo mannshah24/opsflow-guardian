@@ -9,7 +9,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import json
-import uuid
 from app.db.database import get_db
 from app.core.config import settings
 from pydantic import BaseModel, EmailStr
@@ -93,7 +92,7 @@ def authenticate_user(db: Session, email: str, password: str):
     user = get_user(db, email)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password_hash):
         return False
     return user
 
@@ -129,112 +128,59 @@ def send_reset_email(email: str, reset_code: str, background_tasks: BackgroundTa
 
 @router.post("/register", response_model=UserResponse)
 async def register(user_data: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    try:
-        # Validate input
-        if not user_data.email or not user_data.name or not user_data.password:
-            raise HTTPException(
-                status_code=400,
-                detail="Email, password, and name are required"
-            )
-        
-        # Check if user already exists
-        try:
-            existing_user = db.execute(text("SELECT id FROM users WHERE email = :email"), {"email": user_data.email}).fetchone()
-            if existing_user:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Email already registered"
-                )
-        except Exception as e:
-            # If table doesn't exist, create user anyway
-            print(f"Database query error (might be first user): {e}")
-        
-        # Hash password
-        hashed_password = get_password_hash(user_data.password)
-        
-        # Generate UUID and username
-        user_uuid = str(uuid.uuid4())
-        username = user_data.email.split('@')[0]  # Use email prefix as username
-        
-        # Create new user - try insert, if fails try with different approach
-        try:
-            result = db.execute(text("""
-                INSERT INTO users (user_uuid, email, username, full_name, hashed_password, is_active, created_at) 
-                VALUES (:user_uuid, :email, :username, :full_name, :hashed_password, :is_active, :created_at)
-                RETURNING id, email, full_name, is_active
-            """), {
-                "user_uuid": user_uuid,
-                "email": user_data.email,
-                "username": username,
-                "full_name": user_data.name,
-                "hashed_password": hashed_password,
-                "is_active": True,  # Set to True since we're not doing email verification
-                "created_at": datetime.utcnow()
-            })
-            
-            db.commit()
-            user = result.fetchone()
-            
-            if not user:
-                raise HTTPException(status_code=400, detail="Failed to create user - no data returned")
-            
-            return UserResponse(
-                id=user.id,
-                email=user.email,
-                name=user.full_name,
-                is_active=user.is_active
-            )
-            
-        except Exception as db_error:
-            db.rollback()
-            print(f"Database error: {db_error}")
-            
-            # Try alternative approach - maybe table structure is different
-            try:
-                # Simple insert without RETURNING clause
-                db.execute(text("""
-                    INSERT INTO users (user_uuid, email, username, full_name, hashed_password, is_active, created_at) 
-                    VALUES (:user_uuid, :email, :username, :full_name, :hashed_password, :is_active, :created_at)
-                """), {
-                    "user_uuid": str(uuid.uuid4()),
-                    "email": user_data.email,
-                    "username": user_data.email.split('@')[0],
-                    "full_name": user_data.name,
-                    "hashed_password": hashed_password,
-                    "is_active": True,
-                    "created_at": datetime.utcnow()
-                })
-                
-                db.commit()
-                
-                # Get the user back
-                user_result = db.execute(text("SELECT id, email, full_name, is_active FROM users WHERE email = :email"), {"email": user_data.email}).fetchone()
-                
-                if user_result:
-                    return UserResponse(
-                        id=user_result.id,
-                        email=user_result.email,
-                        name=user_result.full_name,
-                        is_active=user_result.is_active
-                    )
-                else:
-                    raise HTTPException(status_code=400, detail="User created but could not retrieve")
-                    
-            except Exception as final_error:
-                db.rollback()
-                print(f"Final database error: {final_error}")
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Failed to create user: {str(final_error)}"
-                )
-                
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Unexpected error in register: {e}")
+    # Validate input
+    if not user_data.email or not user_data.name or not user_data.password:
         raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}"
+            status_code=400,
+            detail="Email, password, and name are required"
+        )
+    
+    # Check if user already exists
+    existing_user = db.execute(text("SELECT id FROM users WHERE email = :email"), {"email": user_data.email}).fetchone()
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+    
+    # Hash password
+    hashed_password = get_password_hash(user_data.password)
+    
+    # Generate verification code
+    verification_code = generate_verification_code()
+    
+    # Create new user
+    try:
+        result = db.execute(text("""
+            INSERT INTO users (email, name, password_hash, verification_code, is_active, created_at) 
+            VALUES (:email, :name, :password_hash, :verification_code, :is_active, :created_at)
+            RETURNING id, email, name, is_active
+        """), {
+            "email": user_data.email,
+            "name": user_data.name,
+            "password_hash": hashed_password,
+            "verification_code": verification_code,
+            "is_active": True,  # Set to True for now, change to False for email verification
+            "created_at": datetime.utcnow()
+        })
+        
+        db.commit()
+        user = result.fetchone()
+        
+        # Send verification email
+        send_verification_email(user_data.email, verification_code, background_tasks)
+        
+        return UserResponse(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            is_active=user.is_active
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Failed to create user"
         )
 
 @router.post("/login", response_model=Token)
@@ -373,10 +319,10 @@ async def reset_password(reset_data: PasswordResetConfirm, db: Session = Depends
     hashed_password = get_password_hash(reset_data.new_password)
     db.execute(text("""
         UPDATE users 
-        SET hashed_password = :hashed_password, reset_code = NULL, reset_code_expires = NULL 
+        SET password_hash = :password_hash, reset_code = NULL, reset_code_expires = NULL 
         WHERE reset_code = :reset_code
     """), {
-        "hashed_password": hashed_password,
+        "password_hash": hashed_password,
         "reset_code": reset_data.reset_code
     })
     
@@ -389,7 +335,7 @@ async def read_users_me(current_user = Depends(get_current_user)):
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
-        name=current_user.full_name,
+        name=current_user.name,
         is_active=current_user.is_active
     )
 
@@ -406,7 +352,7 @@ async def get_user_dashboard(current_user = Depends(get_current_user), db: Sessi
     dashboard_data = {
         "user": {
             "id": current_user.id,
-            "name": current_user.full_name,
+            "name": current_user.name,
             "email": current_user.email
         },
         "stats": {
@@ -442,7 +388,7 @@ async def get_user_dashboard(current_user = Depends(get_current_user), db: Sessi
 async def google_oauth():
     """Initiate Google OAuth flow"""
     google_client_id = "872245858233-fuvfnftodd3fat983nh1sv47o55fvd0u.apps.googleusercontent.com"
-    redirect_uri = "http://localhost:8001/api/v1/auth/oauth/google/callback"
+    redirect_uri = "http://localhost:8000/api/v1/auth/oauth/google/callback"
     scope = "openid email profile"
     
     auth_url = (
@@ -460,7 +406,7 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
     """Handle Google OAuth callback"""
     google_client_id = "872245858233-fuvfnftodd3fat983nh1sv47o55fvd0u.apps.googleusercontent.com"
     google_client_secret = "GOCSPX-your-google-client-secret"  # You need to get this from Google Console
-    redirect_uri = "http://localhost:8001/api/v1/auth/oauth/google/callback"
+    redirect_uri = "http://localhost:8000/api/v1/auth/oauth/google/callback"
     
     # Exchange code for token
     token_data = {
@@ -492,16 +438,16 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
         if not existing_user:
             # Create new user
             result = db.execute(text("""
-                INSERT INTO users (user_uuid, email, username, full_name, is_active, created_at) 
-                VALUES (:user_uuid, :email, :username, :full_name, :is_active, :created_at)
-                RETURNING id, email, full_name, is_active
+                INSERT INTO users (email, name, is_active, created_at, oauth_provider, oauth_id) 
+                VALUES (:email, :name, :is_active, :created_at, :oauth_provider, :oauth_id)
+                RETURNING id, email, name, is_active
             """), {
-                "user_uuid": str(uuid.uuid4()),
                 "email": user_info["email"],
-                "username": user_info["email"].split('@')[0],
-                "full_name": user_info["name"],
+                "name": user_info["name"],
                 "is_active": True,
-                "created_at": datetime.utcnow()
+                "created_at": datetime.utcnow(),
+                "oauth_provider": "google",
+                "oauth_id": user_info["id"]
             })
             db.commit()
             user_data = result.fetchone()
@@ -516,7 +462,7 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
         )
         
         # Redirect to frontend with token
-        frontend_url = f"http://localhost:5173/auth/callback?token={access_token}"
+        frontend_url = f"http://localhost:3000/auth/callback?token={access_token}"
         return RedirectResponse(url=frontend_url)
         
     except Exception as e:
