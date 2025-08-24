@@ -39,6 +39,18 @@
 - **Cost Analysis**: Track resource usage and optimization opportunities
 - **Compliance Reporting**: Generate reports for regulatory requirements
 
+## 🚀 Live Demo
+
+**🌐 Frontend:** [https://opsflow-guardian.vercel.app](https://opsflow-guardian.vercel.app)  
+**🔧 Backend API:** [https://ops-backend-production-7ddf.up.railway.app](https://ops-backend-production-7ddf.up.railway.app)
+
+### Tech Stack
+- **Frontend:** React 18 + TypeScript, deployed on Vercel
+- **Backend:** FastAPI + Python, deployed on Railway
+- **Database:** PostgreSQL with Redis caching
+- **AI:** Google Gemini 2.5 + Portia AI SDK
+- **Integrations:** 20+ enterprise services
+
 ## 🏗️ Architecture
 
 ```
