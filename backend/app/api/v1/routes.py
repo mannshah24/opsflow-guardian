@@ -9,18 +9,17 @@ from app.api.v1.endpoints import (
     approvals,
     audit,
     analytics,
-    auth,
     email_config,
     company
 )
+from app.api.v1.auth import router as google_auth_router
 
 api_router = APIRouter()
 
 # Include all endpoint routers
 api_router.include_router(
-    auth.router,
-    prefix="/auth",
-    tags=["Authentication"]
+    google_auth_router,
+    tags=["Google Authentication"]
 )
 
 api_router.include_router(

@@ -16,7 +16,7 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
-import AuthCallback from "./pages/AuthCallback";
+import OAuthCallback from "./components/auth/OAuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,7 +32,7 @@ const App = () => (
             {/* Public Routes - No Authentication Required */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/callback" element={<OAuthCallback />} />
             
             {/* Protected Routes - Authentication Required */}
             <Route path="/" element={

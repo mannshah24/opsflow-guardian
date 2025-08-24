@@ -141,7 +141,7 @@ export default function Login() {
     }
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/auth/login-json', {
+      const response = await fetch('https://ops-backend-production-7ddf.up.railway.app/api/v1/auth/login-json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

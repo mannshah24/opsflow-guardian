@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock, Eye, EyeOff, Chrome, ArrowLeft, AlertCircle, CheckCircle, XCircle, UserX, Key } from 'lucide-react';
+import { googleAuthService } from '@/services/googleAuth';
 
 export default function Login() {
   const isMobile = useIsMobile();
@@ -30,7 +31,15 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    if (googleAuthService.isAuthenticated()) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
 
   // Dialog states
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -141,7 +150,7 @@ export default function Login() {
     }
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/auth/login-json', {
+      const response = await fetch('https://ops-backend-production-7ddf.up.railway.app/api/v1/auth/login-json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,10 +184,19 @@ export default function Login() {
 
   const handleGoogleAuth = async () => {
     try {
-      window.location.href = 'http://localhost:8001/api/v1/auth/oauth/google';
-    } catch (error) {
-      console.error('Google OAuth failed:', error);
-      showErrorDialog('Google authentication failed');
+      setIsGoogleLoading(true);
+      setError('');
+      
+      await googleAuthService.signIn();
+    } catch (err) {
+      console.error('Google OAuth failed:', err);
+      showErrorDialog(
+        err instanceof Error 
+          ? err.message 
+          : 'Google authentication failed. Please try again.'
+      );
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -261,9 +279,10 @@ export default function Login() {
               variant="outline"
               size="lg"
               className="w-full glass-button gap-3 border-border-hover hover:border-primary"
+              disabled={isLoading || isGoogleLoading}
             >
               <Chrome className="w-5 h-5" />
-              Sign in with Google
+              {isGoogleLoading ? 'Connecting with Google...' : 'Sign in with Google'}
             </Button>
 
             <div className="relative">

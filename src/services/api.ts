@@ -6,6 +6,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
 const API_VERSION = '/api/v1';
 
+// Export for use in other services
+export { API_BASE_URL };
+
 // Authentication utilities
 class AuthManager {
   private static TOKEN_KEY = 'opsflow_auth_token';

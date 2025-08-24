@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, Loader2 } from 'lucide-react';
+import { googleAuthService } from '@/services/googleAuth';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -16,30 +17,55 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     checkAuthentication();
   }, [location.pathname]);
 
-  const checkAuthentication = () => {
+  const checkAuthentication = async () => {
     setIsLoading(true);
     
-    // Check for auth token in localStorage
-    const token = localStorage.getItem('opsflow_auth_token');
-    
-    if (token && token.length > 10) {
-      // Token exists and has reasonable length - user is authenticated
-      setIsAuthenticated(true);
+    try {
+      // Check if user is authenticated using Google auth service
+      const isAuth = googleAuthService.isAuthenticated();
+      
+      if (isAuth) {
+        // Try to get current user to verify token validity
+        const user = await googleAuthService.getCurrentUser();
+        if (user) {
+          setIsAuthenticated(true);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // Also check for legacy auth token
+      const legacyToken = localStorage.getItem('opsflow_auth_token');
+      if (legacyToken && legacyToken.length > 10) {
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return;
+      }
+      
+      // If no valid authentication found
+      setIsAuthenticated(false);
       setIsLoading(false);
-      return;
-    }
-    
-    // If no valid authentication found
-    setIsAuthenticated(false);
-    setIsLoading(false);
-    
-    // Don't redirect if already on login/signup pages
-    const publicPaths = ['/login', '/signup', '/auth/callback'];
-    if (!publicPaths.includes(location.pathname)) {
-      navigate('/login', { 
-        replace: true, 
-        state: { from: location.pathname } 
-      });
+      
+      // Don't redirect if already on login/signup pages
+      const publicPaths = ['/login', '/signup', '/auth/callback'];
+      if (!publicPaths.includes(location.pathname)) {
+        navigate('/login', { 
+          replace: true, 
+          state: { from: location.pathname } 
+        });
+      }
+    } catch (error) {
+      console.error('Authentication check failed:', error);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      
+      const publicPaths = ['/login', '/signup', '/auth/callback'];
+      if (!publicPaths.includes(location.pathname)) {
+        navigate('/login', { 
+          replace: true, 
+          state: { from: location.pathname } 
+        });
+      }
     }
   };
 
