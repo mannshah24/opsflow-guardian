@@ -3,7 +3,7 @@
  * Centralized API calls to fetch real data from Portia agents
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'ops-backend-production-7ddf.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ops-backend-production-7ddf.up.railway.app';
 const API_VERSION = '/api/v1';
 
 // Export for use in other services
