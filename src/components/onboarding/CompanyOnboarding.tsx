@@ -163,7 +163,7 @@ const CompanyOnboarding: React.FC<CompanyOnboardingProps> = ({ onComplete, onSki
 
   const canProceedStep1 = formData.companyName.trim() && formData.industry && formData.size;
   const canProceedStep2 = formData.primaryGoals.length > 0;
-  const canProceedStep3 = formData.automationNeeds.length > 0 || formData.techStack.length > 0;
+  const canProceedStep3 = true; // Allow proceeding to step 4 even with no selections (optional fields)
 
   return (
     <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -127,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
   const handleLogout = () => {
     // Remove token
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('opsflow_auth_token');
     
     // Redirect to home
     navigate('/');
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   // Check if user is authenticated
-  const isAuthenticated = !!localStorage.getItem('access_token');
+  const isAuthenticated = !!localStorage.getItem('opsflow_auth_token');
 
   return (
     <header className="h-14 sm:h-16 bg-card border-b border-border px-3 sm:px-6 flex items-center justify-between gap-3">

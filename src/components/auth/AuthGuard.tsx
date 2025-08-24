@@ -21,19 +21,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     
     // Check for auth token in localStorage
     const token = localStorage.getItem('opsflow_auth_token');
-    const user = localStorage.getItem('opsflow_user');
     
-    if (token && user) {
-      try {
-        // Validate token format (basic check)
-        if (token.length > 10) {
-          setIsAuthenticated(true);
-          setIsLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error('Token validation error:', error);
-      }
+    if (token && token.length > 10) {
+      // Token exists and has reasonable length - user is authenticated
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      return;
     }
     
     // If no valid authentication found

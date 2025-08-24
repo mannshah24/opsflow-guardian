@@ -3,7 +3,8 @@
  * Centralized API calls to fetch real data from Portia agents
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8002';
+const API_VERSION = '/api/v1';
 
 // Authentication utilities
 class AuthManager {
@@ -158,7 +159,8 @@ export interface AnalyticsData {
 
 class ApiService {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const fullUrl = `${API_BASE_URL}${API_VERSION}${endpoint}`;
+    const response = await fetch(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,

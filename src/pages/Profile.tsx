@@ -76,7 +76,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('opsflow_auth_token');
         if (!token) {
           // Redirect to login if no token
           window.location.href = '/login';
@@ -105,7 +105,7 @@ export default function Profile() {
           });
         } else if (response.status === 401) {
           // Token is invalid, redirect to login
-          localStorage.removeItem('access_token');
+          localStorage.removeItem('opsflow_auth_token');
           window.location.href = '/login';
         } else {
           console.error('Failed to fetch user data');
@@ -145,7 +145,7 @@ export default function Profile() {
     setSuccessMessage('');
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('opsflow_auth_token');
       if (!token) {
         alert('Session expired. Please log in again.');
         window.location.href = '/login';

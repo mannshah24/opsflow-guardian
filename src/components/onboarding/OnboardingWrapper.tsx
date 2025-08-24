@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/services/api';
 import CompanyOnboarding from '@/components/onboarding/CompanyOnboarding';
 
@@ -9,6 +10,7 @@ interface OnboardingWrapperProps {
 const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
@@ -46,10 +48,8 @@ const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }) => {
     localStorage.removeItem('opsflow-first-time-user'); // Clear first-time user flag
     setShowOnboarding(false);
     
-    // Redirect to dashboard after onboarding completion
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 100);
+    // Navigate to dashboard after onboarding completion
+    navigate('/dashboard');
   };
 
   const handleOnboardingSkip = () => {
@@ -57,10 +57,8 @@ const OnboardingWrapper: React.FC<OnboardingWrapperProps> = ({ children }) => {
     localStorage.removeItem('opsflow-first-time-user'); // Clear first-time user flag
     setShowOnboarding(false);
     
-    // Redirect to dashboard after skipping onboarding
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 100);
+    // Navigate to dashboard after skipping onboarding
+    navigate('/dashboard');
   };
 
   if (loading) {

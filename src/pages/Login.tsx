@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Mail, Lock, Eye, EyeOff, Chrome, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -53,13 +55,13 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok && data.access_token) {
-        // Store token
-        localStorage.setItem('access_token', data.access_token);
+        // Store token with the correct key
+        localStorage.setItem('opsflow_auth_token', data.access_token);
         
         alert(`✅ Login successful! Welcome back!`);
         
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
+        // Navigate to dashboard using React Router
+        navigate('/dashboard');
       } else {
         setError(data.detail || 'Login failed');
       }
@@ -82,7 +84,7 @@ export default function Login() {
   };
 
   const handleBackToDashboard = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (
@@ -209,7 +211,7 @@ export default function Login() {
               Don't have an account?{' '}
               <button
                 className="text-primary hover:text-primary-accent transition-colors font-medium"
-                onClick={() => window.location.href = '/signup'}
+                onClick={() => navigate('/signup')}
               >
                 Sign up
               </button>

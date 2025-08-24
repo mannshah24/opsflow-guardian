@@ -1,26 +1,29 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 
 export default function AuthCallback() {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     // Get token from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
     if (token) {
-      // Store token
-      localStorage.setItem('access_token', token);
+      // Store token with the correct key
+      localStorage.setItem('opsflow_auth_token', token);
       
-      // Redirect to dashboard
+      // Navigate to dashboard
       alert('✅ Google OAuth successful! Welcome!');
-      window.location.href = '/';
+      navigate('/');
     } else {
-      // No token, redirect to login
+      // No token, navigate to login
       alert('❌ OAuth failed. Please try again.');
-      window.location.href = '/login';
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background-subtle to-background-accent flex items-center justify-center p-4">

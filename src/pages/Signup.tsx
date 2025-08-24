@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { Mail, Lock, Eye, EyeOff, Chrome, ArrowLeft, User, Building } from 'luci
 
 export default function Signup() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -92,8 +94,8 @@ export default function Signup() {
         
         alert(`✅ Account created successfully! Welcome ${data.name}! Let's set up your company profile.`);
         
-        // Redirect to dashboard where onboarding will automatically trigger
-        window.location.href = '/dashboard';
+        // Navigate to dashboard where onboarding will automatically trigger
+        navigate('/dashboard');
       } else {
         setError(data.detail || 'Registration failed');
       }
@@ -116,7 +118,7 @@ export default function Signup() {
   };
 
   const handleBackToDashboard = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (
@@ -300,7 +302,7 @@ export default function Signup() {
               Already have an account?{' '}
               <button
                 className="text-primary hover:text-primary-accent transition-colors font-medium"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => navigate('/login')}
               >
                 Sign in
               </button>
