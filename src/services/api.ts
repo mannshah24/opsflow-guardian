@@ -203,19 +203,17 @@ class ApiService {
         throw new Error('Authentication required. Please log in to create agents.');
       }
       
-      const response = await this.request<{ success: boolean; data: Agent }>('/agents', {
+      const response = await this.request<{ success: boolean; data: Agent }>('/agents/', {
         method: 'POST',
         headers: AuthManager.getAuthHeaders(),
         body: JSON.stringify({
           name: agentData.name,
           description: agentData.description,
-          agent_type: agentData.type || 'workflow',
-          llm_provider: 'gemini',
-          llm_model: 'gemini-2.5-flash',
-          system_prompt: `You are an AI agent named "${agentData.name}". ${agentData.description}`,
-          tools: [],
-          auto_approve_threshold: 0.8,
-          max_execution_time: 300
+          role: agentData.type || 'workflow',  // Add required role field
+          status: 'active',
+          capabilities: ['task_automation', 'data_processing', 'workflow_execution'],
+          tasks_completed: 0,
+          success_rate: 100.0
         }),
       });
       return response.data || null;
