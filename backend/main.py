@@ -55,7 +55,14 @@ app.add_middleware(
 
 # Import simplified API endpoints
 from app.api.v1 import endpoints
-from app.api.v1.auth import router as google_auth_router
+
+# Try to import Google OAuth router
+try:
+    from app.api.v1.auth import router as google_auth_router
+    google_oauth_available = True
+except ImportError as e:
+    logger.warning(f"Google OAuth not available: {e}")
+    google_oauth_available = False
 
 # Register routes directly
 app.include_router(endpoints.agents.router, prefix="/api/v1/agents", tags=["Agents"])
@@ -64,7 +71,8 @@ app.include_router(endpoints.approvals.router, prefix="/api/v1/approvals", tags=
 app.include_router(endpoints.audit.router, prefix="/api/v1/audit", tags=["Audit"])
 app.include_router(endpoints.analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(endpoints.auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(google_auth_router, tags=["Google Authentication"])
+if google_oauth_available:
+    app.include_router(google_auth_router, tags=["Google Authentication"])
 app.include_router(endpoints.company.router, prefix="/api/v1", tags=["Company Profile"])
 
 
