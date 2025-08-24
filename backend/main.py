@@ -177,9 +177,9 @@ async def database_status():
 if __name__ == "__main__":
     import uvicorn
     print("🎉 OpsFlow Guardian 2.0 Backend starting...")
-    print("📊 API Documentation: http://localhost:8001/docs") 
-    print("🔗 Health Check: http://localhost:8001/health")
-    print("🗄️ Database Status: http://localhost:8001/database/status")
+    print("📊 API Documentation: ops-backend-production-7ddf.up.railway.app/docs") 
+    print("🔗 Health Check: ops-backend-production-7ddf.up.railway.app/health")
+    print("🗄️ Database Status: ops-backend-production-7ddf.up.railway.app/database/status")
     print("🌐 WebSocket: ws://localhost:8001/ws")
     print("🔄 Press CTRL+C to stop the server")
     print("-" * 50)

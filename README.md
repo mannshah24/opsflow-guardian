@@ -112,15 +112,15 @@ npm run dev
 
 ### 4. Access Application
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8001
-- **API Documentation**: http://localhost:8001/docs
+- **Backend API**: ops-backend-production-7ddf.up.railway.app
+- **API Documentation**: ops-backend-production-7ddf.up.railway.app/docs
 
 ## 📚 Documentation
 
 - **[Database Schema](docs/DATABASE_SCHEMA.md)** - Complete database structure and relationships
 - **[Company Onboarding](docs/COMPANY_ONBOARDING_FLOW.md)** - Multi-tenant setup process
 - **[Workflow Testing](docs/WORKFLOW_RUN_PAUSE_TEST.md)** - Testing procedures and examples
-- **[API Reference](http://localhost:8001/docs)** - Interactive API documentation
+- **[API Reference](ops-backend-production-7ddf.up.railway.app/docs)** - Interactive API documentation
 
 ## 🛠️ Development
 
@@ -157,7 +157,7 @@ GOOGLE_API_KEY=your-google-api-key
 
 **Frontend** (\`.env\`):
 \`\`\`env
-VITE_API_BASE_URL=http://localhost:8001
+VITE_API_BASE_URL=ops-backend-production-7ddf.up.railway.app
 \`\`\`
 
 ### Database Management

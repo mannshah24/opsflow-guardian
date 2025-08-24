@@ -442,7 +442,7 @@ async def get_user_dashboard(current_user = Depends(get_current_user), db: Sessi
 async def google_oauth():
     """Initiate Google OAuth flow"""
     google_client_id = "872245858233-fuvfnftodd3fat983nh1sv47o55fvd0u.apps.googleusercontent.com"
-    redirect_uri = "http://localhost:8001/api/v1/auth/oauth/google/callback"
+    redirect_uri = "ops-backend-production-7ddf.up.railway.app/api/v1/auth/oauth/google/callback"
     scope = "openid email profile"
     
     auth_url = (
@@ -460,7 +460,7 @@ async def google_oauth_callback(code: str, db: Session = Depends(get_db)):
     """Handle Google OAuth callback"""
     google_client_id = "872245858233-fuvfnftodd3fat983nh1sv47o55fvd0u.apps.googleusercontent.com"
     google_client_secret = "GOCSPX-your-google-client-secret"  # You need to get this from Google Console
-    redirect_uri = "http://localhost:8001/api/v1/auth/oauth/google/callback"
+    redirect_uri = "ops-backend-production-7ddf.up.railway.app/api/v1/auth/oauth/google/callback"
     
     # Exchange code for token
     token_data = {

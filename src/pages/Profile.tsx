@@ -84,7 +84,7 @@ export default function Profile() {
           return;
         }
 
-        const response = await fetch('http://localhost:8001/api/v1/auth/me', {
+        const response = await fetch('ops-backend-production-7ddf.up.railway.app/api/v1/auth/me', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

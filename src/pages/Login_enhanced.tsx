@@ -175,7 +175,7 @@ export default function Login() {
 
   const handleGoogleAuth = async () => {
     try {
-      window.location.href = 'http://localhost:8001/api/v1/auth/oauth/google';
+      window.location.href = 'ops-backend-production-7ddf.up.railway.app/api/v1/auth/oauth/google';
     } catch (error) {
       console.error('Google OAuth failed:', error);
       showErrorDialog('Google authentication failed');
