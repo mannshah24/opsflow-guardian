@@ -265,7 +265,7 @@ class Workflow(Base):
     
     # Metadata
     tags = Column(JSONB)
-    metadata = Column(JSONB)
+    workflow_metadata = Column('metadata', JSONB)
     
     # Performance metrics
     total_executions = Column(Integer, default=0)
@@ -427,7 +427,7 @@ class EmailNotification(Base):
     
     # Metadata
     smtp_response = Column(Text)
-    metadata = Column(JSONB)
+    email_metadata = Column('metadata', JSONB)
     
     # Relationships
     sender = relationship("User")
@@ -494,7 +494,7 @@ class AuditTrail(Base):
     event_description = Column(Text, nullable=False)
     old_values = Column(JSONB)
     new_values = Column(JSONB)
-    metadata = Column(JSONB)
+    audit_metadata = Column('metadata', JSONB)
     
     # Request context
     ip_address = Column(INET)
