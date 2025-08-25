@@ -1,3 +1,7 @@
+# Entrypoint for running with Uvicorn (for Railway, Heroku, etc.)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
 """
 OpsFlow Guardian 2.0 - Simplified Main Application Entry Point
 FastAPI-based backend with Supabase (PostgreSQL) database integration
