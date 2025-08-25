@@ -37,3 +37,4 @@ stripe==12.2.0
 sendgrid==6.12.1
 twilio==9.7.1
 supabase==2.8.1
+httpx>=0.24,<0.28
